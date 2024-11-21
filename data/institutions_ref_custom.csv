@@ -1,0 +1,21 @@
+﻿name,decimalLongitude,decimalLatitude,city,country,address,source,type,geocoding.precision.m,geocoding.issue,geocoding.source,inside.ptoected.area.WDPAID
+Natural Sciences Museum of Tenerife,-16.6291,28.2916,Tenerife,ESP,"Fuente Morales, 1",GBIF,Museum,10,NA,automatic,389013
+Jardin de Aclimatacion de la Orotava,-16.5354,28.411,Tenerife,ESP,"C. Retama, 2, 38400 Puerto de la Cruz, Santa Cruz de Tenerife",Manual,Botanic_garden,NA,NA,NA,NA
+Hijuela Botanical Garden,-16.524461,28.388853,Tenerife,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Marquesado de la Quinta Roja Garden,-16.522992,28.389442,Tenerife,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+University of La Laguna,-16.315808,28.481075,Tenerife,ESP,NA,Manual,University,NA,NA,NA,NA
+"University of La Laguna, Campus Padre Anchieta",-16.320769,28.481814,Tenerife,ESP,NA,Manual,University,NA,NA,NA,NA
+Museum of Nature and Archaeology,-16.24948,28.46386,Tenerife,ESP,NA,Manual,Museum,NA,NA,NA,NA
+Jardin Botanico Canario Viera y Clavijo,-15.4621,28.0645,Las Palmas De Gran Canaria,ESP,NA,indexherbariorum,Botanic_garden,10,NA,automatic,142929
+Vivero Forestal de Tafira,-15.454614,28.079083,Las Palmas De Gran Canaria,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+El Jardín Secreto (The Secret Garden),-15.428994,28.114914,Las Palmas De Gran Canaria,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Jardines del Hotel Santa Catalina,-15.427547,28.121397,Las Palmas De Gran Canaria,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Cañada Blanca Visitor Center,-16.627344,28.224297,Tenerife,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+El Portillo Visitor Center,-16.5661,28.304633,Tenerife,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Descubrimiento de Vallehermoso Botanical Garden,-17.262575,28.187825,La Gomera,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Centro de Visitantes de La Caldera de Taburiente,-17.852389,28.654047,La Palma,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Maspalomas Botanical Garden,-15.585686,27.759344,Las Palmas De Gran Canaria,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Parque Rural de Teno Visitor Center,-16.850894,28.342025,Tenerife,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Fuerteventure Botanical Garden,-14.163675,28.182439,Fuerteventura,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+Botanic Park of Corralejo,-13.864125,28.726164,Fuerteventura,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
+The Cactus Garden,-13.476183,29.080392,Lanzarote,ESP,NA,Manual,Botanic_garden,NA,NA,NA,NA
