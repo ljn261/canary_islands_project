@@ -1,4 +1,4 @@
-# plant_project
+# Canary Islands Plant Project
 Repository containing files for extraction, compilation and analysis of environmental data of plants on the Canary Islands.
 
 ## Content
