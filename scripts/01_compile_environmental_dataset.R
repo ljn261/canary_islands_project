@@ -29,80 +29,75 @@ source('scripts/00_aux_functions.R')
 
 # LOAD IN FILES: ----
 # Load in shapefile
-shape_file <- read_sf("data/gadm_land_3/gadm_land_3.shp")
+shape_file <- sf::read_sf("data/gadm_land_3/gadm_land_3.shp")
 
 # Load in centroid/institutions reference dataset:
-centroid_ref <- read.csv('data/centroid_ref_custom.csv')
-institutions_ref <- read.csv('data/institutions_ref_custom.csv')
+centroid_ref <- utils::read.csv('data/centroid_ref_custom.csv')
+institutions_ref <- utils::read.csv('data/institutions_ref_custom.csv')
 
 # Load in island occurrence dataset (Beierkuhnlein et al. 2021)
-species_island_data <- read.csv('data/island_occurrence_data_custom.csv')
+species_island_data <- utils::read.csv('data/island_occurrence_data_custom.csv')
 species_island_data[, names(species_island_data) != "species_name"] <- 
-  apply(species_island_data[, names(species_island_data) != "species_name"], 2, function(x){x == 1}) # change binary to logical values
+  base::apply(species_island_data[, names(species_island_data) != "species_name"], 2, function(x){x == 1}) # change binary to logical values
 
 # Load in DEM
-DEM_rast <- raster("data/DEM/canaryclim_dem.tif")
+DEM_rast <- raster::raster("data/DEM/canaryclim_dem.tif", crs = COORD_REF_SYSTEM)
 DEM_rast <- terra::rast(DEM_rast)
 
 # Calculate Terrain Ruggedness Index (TRI) raster from DEM
 TRI_rast <- spatialEco::tri(DEM_rast)
 
 # Convert DEM and TRI_rast to RasterLayer
-DEM_rast <- raster(DEM_rast)
-TRI_rast <- raster(TRI_rast)
-
-# Load in habitat map:
-IUCN_hab_map <- raster('data/environmental_data/IUCN/iucn_habitatclassification_composite_lvl2_ver003.tif')
-IUCN_hab_map <- projectRaster(IUCN_hab_map, crs = COORD_REF_SYSTEM) # Change CRS, takes a long time!
+DEM_rast <- raster::raster(DEM_rast)
+TRI_rast <- raster::raster(TRI_rast)
 
 # Load in BioClim variable 1 (mean annual temperature):
-bioclim1_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_01_1979_2013.tif')
-bioclim1_rast <- projectRaster(bioclim1_rast, crs = COORD_REF_SYSTEM)
+bioclim1_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_01_1979_2013.tif')
+bioclim1_rast <- raster::projectRaster(bioclim1_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 2 (mean diurnal temperature range):
-bioclim2_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_02_1979_2013.tif')
-bioclim2_rast <- projectRaster(bioclim2_rast, crs = COORD_REF_SYSTEM)
+bioclim2_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_02_1979_2013.tif')
+bioclim2_rast <- raster::projectRaster(bioclim2_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 4 (temperature seasonality):
-bioclim4_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_04_1979_2013.tif')
-bioclim4_rast <- projectRaster(bioclim4_rast, crs = COORD_REF_SYSTEM)
-#bioclim4_rast <- bioclim4_rast/100
+bioclim4_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_04_1979_2013.tif')
+bioclim4_rast <- raster::projectRaster(bioclim4_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 9 (mean daily temperature of driest quarter):
-bioclim9_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_09_1979_2013.tif')
-bioclim9_rast <- projectRaster(bioclim9_rast, crs = COORD_REF_SYSTEM)
+bioclim9_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_09_1979_2013.tif')
+bioclim9_rast <- raster::projectRaster(bioclim9_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 11 (mean daily temperature of coldest quarter):
-bioclim11_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_11_1979_2013.tif')
-bioclim11_rast <- projectRaster(bioclim11_rast, crs = COORD_REF_SYSTEM)
+bioclim11_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_11_1979_2013.tif')
+bioclim11_rast <- raster::projectRaster(bioclim11_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 12 (mean annual precipitation):
-bioclim12_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_12_1979_2013.tif')
-bioclim12_rast <- projectRaster(bioclim12_rast, crs = COORD_REF_SYSTEM)
+bioclim12_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_12_1979_2013.tif')
+bioclim12_rast <- raster::projectRaster(bioclim12_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 15 (precipitation seasonality):
-bioclim15_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_15_1979_2013.tif')
-bioclim15_rast <- projectRaster(bioclim15_rast, crs = COORD_REF_SYSTEM)
+bioclim15_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_15_1979_2013.tif')
+bioclim15_rast <- raster::projectRaster(bioclim15_rast, crs = COORD_REF_SYSTEM)
 
 # Load in BioClim variable 17 (mean monthly precipitation of driest quarter):
-bioclim17_rast <- raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_17_1979_2013.tif')
-bioclim17_rast <- projectRaster(bioclim17_rast, crs = COORD_REF_SYSTEM)
+bioclim17_rast <- raster::raster('data/environmental_data/bioclim/CHELSA_CanaryIslands_bio_17_1979_2013.tif')
+bioclim17_rast <- raster::projectRaster(bioclim17_rast, crs = COORD_REF_SYSTEM)
 
 # Load in evapotranspiration data:
-evapotranspiration_rast <- raster('data/environmental_data/WaPOR-3/AETI/WaPORV3_average_annualAETI.tif')
-evapotranspiration_rast <- projectRaster(evapotranspiration_rast, crs = COORD_REF_SYSTEM)
+evapotranspiration_rast <- raster::raster('data/environmental_data/WaPOR-3/AETI/WaPORV3_average_annualAETI.tif')
+evapotranspiration_rast <- raster::projectRaster(evapotranspiration_rast, crs = COORD_REF_SYSTEM)
 
 # Load in evaporation data:
-evaporation_rast <- raster('data/environmental_data/WaPOR-3/E/WaPORV3_average_annualE.tif')
-evaporation_rast <- projectRaster(evaporation_rast, crs = COORD_REF_SYSTEM)
+evaporation_rast <- raster::raster('data/environmental_data/WaPOR-3/E/WaPORV3_average_annualE.tif')
+evaporation_rast <- raster::projectRaster(evaporation_rast, crs = COORD_REF_SYSTEM)
 
 # Load in transpiration data:
-transpiration_rast <- raster('data/environmental_data/WaPOR-3/T/WaPORV3_average_annualT.tif')
-transpiration_rast <- projectRaster(transpiration_rast, crs = COORD_REF_SYSTEM)
+transpiration_rast <- raster::raster('data/environmental_data/WaPOR-3/T/WaPORV3_average_annualT.tif')
+transpiration_rast <- raster::projectRaster(transpiration_rast, crs = COORD_REF_SYSTEM)
 
 # Load in interception data:
-interception_rast <- raster('data/environmental_data/WaPOR-3/I/WaPORV3_average_annualI.tif')
-interception_rast <- projectRaster(interception_rast, crs = COORD_REF_SYSTEM)
+interception_rast <- raster::raster('data/environmental_data/WaPOR-3/I/WaPORV3_average_annualI.tif')
+interception_rast <- raster::projectRaster(interception_rast, crs = COORD_REF_SYSTEM)
 
 # Load in species list:
 species_list <- read.csv('data/species_list.csv')
@@ -122,7 +117,6 @@ environmental_data <- compile_dataset(species_list = species_list,
                                       uncertainty_limit = COORDINATE_UNCERTAINTY,
                                       DEM_rast = DEM_rast,
                                       TRI_rast = TRI_rast,
-                                      habitat_rast = IUCN_hab_map,
                                       bioclim1_rast = bioclim1_rast,
                                       bioclim2_rast = bioclim2_rast,
                                       bioclim4_rast = bioclim4_rast,
@@ -152,8 +146,6 @@ environmental_data_summary_500_13 <- environmental_data_500m |>
             annual_precip = median(annual_precip, na.rm = T), # PRECIPITATION---
             precip_driest_quarter = median(precip_driest_quarter, na.rm = T),
             precip_seasonality = median(precip_seasonality, na.rm = T),
-            habitat = toString(unique(na.omit(habitat_information))), # turn habitat information to string of unique habitat codes
-            habitat_num = length(unique(na.omit(habitat_information))),
             evapotranspiration = median(evapotranspiration, na.rm = T), # EVAPOTRANSPIRATION---
             evaporation = median(evaporation, na.rm = T),
             transpiration = median(transpiration, na.rm = T),

@@ -190,7 +190,6 @@ compile_dataset <- function(species_list,
                             uncertainty_limit, 
                             DEM_rast, 
                             TRI_rast,
-                            habitat_rast, 
                             bioclim1_rast,
                             bioclim2_rast,
                             bioclim4_rast,
@@ -293,10 +292,7 @@ compile_dataset <- function(species_list,
           
           TRI <- raster::extract(TRI_rast, cleaned_coordinates) # extract TERRAIN RUGGEDNESS INDEX
           cleaned_coordinates <- cleaned_coordinates %>% mutate(TRI = TRI) # add TRI data to dataframe
-          
-          habitat_information <- raster::extract(habitat_rast, cleaned_coordinates) # extract HABITAT
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(habitat_information = habitat_information) # add habitat information to dataframe
-          
+      
           bioclim1 <- raster::extract(bioclim1_rast, cleaned_coordinates) # exctract annual temperature
           cleaned_coordinates <- cleaned_coordinates %>% mutate(annual_temp = bioclim1)
           
