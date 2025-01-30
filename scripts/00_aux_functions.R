@@ -25,7 +25,7 @@ extract_locality_data <- function(binomial_name){
     occurrence_data_relevant <- cbind(occurrence_data_relevant, coordinateUncertaintyInMeters) 
   }
   
-  occurrence_data_relevant <- occurrence_data_relevant %>% # select relevant columns
+  occurrence_data_relevant <- occurrence_data_relevant |> # select relevant columns
     dplyr::select(gbifID,
                   datasetKey,
                   phylum,
@@ -85,16 +85,16 @@ flag_locality_data <- function(locality_data, shape_file, centroid_ref, institut
   
   if(dim(species_island_data)[1] == 1){
     island_flag <- flag_island_occurrence(locality_data, shape_file, species_island_data) # for each entry, check if occurs on correct island (according to Beierkuhnlein)
-    flags <- flags %>% mutate('island' = island_flag) # add column containing island flags to flags dataframe
+    flags <- flags |> mutate('island' = island_flag) # add column containing island flags to flags dataframe
   } else {
     stop('Incorrect dimension of species island occurrence data. \n')
   }
   
   cdrep_flag <- flag_locality_issue(locality_data) # for each entry, check whether 'cdrep' issue is present
-  flags <- flags %>% mutate('cdrep_issue' = cdrep_flag)
+  flags <- flags |> mutate('cdrep_issue' = cdrep_flag)
   
   uncertainty_flag <- flag_coordinate_uncertainty(locality_data, uncertainty_limit)
-  flags <- flags %>% mutate('coord_uncertainty' = uncertainty_flag)
+  flags <- flags |> mutate('coord_uncertainty' = uncertainty_flag)
   
   return(flags)
 }
@@ -245,10 +245,10 @@ compile_dataset <- function(species_list,
                                     species_island_data_subset, 
                                     uncertainty_limit = uncertainty_limit) # flag locality data
         
-        locality_data <- locality_data %>% 
-          mutate(.summary = flags$.summary) %>%
-          mutate(island = flags$island) %>%
-          mutate(cdrep = flags$cdrep_issue) %>%
+        locality_data <- locality_data |> 
+          mutate(.summary = flags$.summary) |>
+          mutate(island = flags$island) |>
+          mutate(cdrep = flags$cdrep_issue) |>
           mutate(coord_uncertainty = flags$coord_uncertainty)
         
         # Locality data cleaning:
@@ -288,46 +288,46 @@ compile_dataset <- function(species_list,
           
           # Environmental variable extraction:
           elevation <- raster::extract(DEM_rast, cleaned_coordinates) # extract ELEVATION
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(elevation = elevation) # add elevation data to dataframe
+          cleaned_coordinates <- cleaned_coordinates |> mutate(elevation = elevation) # add elevation data to dataframe
           
           TRI <- raster::extract(TRI_rast, cleaned_coordinates) # extract TERRAIN RUGGEDNESS INDEX
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(TRI = TRI) # add TRI data to dataframe
+          cleaned_coordinates <- cleaned_coordinates |> mutate(TRI = TRI) # add TRI data to dataframe
       
           bioclim1 <- raster::extract(bioclim1_rast, cleaned_coordinates) # exctract annual temperature
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(annual_temp = bioclim1)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(annual_temp = bioclim1)
           
           bioclim2 <- raster::extract(bioclim2_rast, cleaned_coordinates) # extract diurnal temperature range
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(diurnal_temp_range = bioclim2)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(diurnal_temp_range = bioclim2)
           
           bioclim4 <- raster::extract(bioclim4_rast, cleaned_coordinates) # extract temperature seasonality
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(temp_seasonality = bioclim4)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(temp_seasonality = bioclim4)
           
           bioclim9 <- raster::extract(bioclim9_rast, cleaned_coordinates) # extract temperature of driest quarter
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(temp_driest_quarter = bioclim9)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(temp_driest_quarter = bioclim9)
           
           bioclim11 <- raster::extract(bioclim11_rast, cleaned_coordinates) # extract temperature of coldest quarter
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(temp_coldest_quarter = bioclim11)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(temp_coldest_quarter = bioclim11)
           
           bioclim12 <- raster::extract(bioclim12_rast, cleaned_coordinates) # extract annual precipitation
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(annual_precip = bioclim12)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(annual_precip = bioclim12)
           
           bioclim15 <- raster::extract(bioclim15_rast, cleaned_coordinates) # extract precipitation seasonality
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(precip_seasonality = bioclim15)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(precip_seasonality = bioclim15)
           
           bioclim17 <- raster::extract(bioclim17_rast, cleaned_coordinates) # extract precipitation of driest quarter
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(precip_driest_quarter = bioclim17)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(precip_driest_quarter = bioclim17)
           
           evapotranspiration <- raster::extract(evapotranspiration_rast, cleaned_coordinates) # extract evapotranspiration
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(evapotranspiration = evapotranspiration)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(evapotranspiration = evapotranspiration)
           
           evaporation <- raster::extract(evaporation_rast, cleaned_coordinates) # extract evaporation
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(evaporation = evaporation)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(evaporation = evaporation)
           
           transpiration <- raster::extract(transpiration_rast, cleaned_coordinates) # extract transpiration
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(transpiration = transpiration)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(transpiration = transpiration)
           
           interception <- raster::extract(interception_rast, cleaned_coordinates) # extract interception
-          cleaned_coordinates <- cleaned_coordinates %>% mutate(interception = interception)
+          cleaned_coordinates <- cleaned_coordinates |> mutate(interception = interception)
           
           environmental_data <- rbind(environmental_data, cleaned_coordinates) # add information to final dataframe
         }
