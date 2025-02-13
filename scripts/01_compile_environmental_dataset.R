@@ -19,7 +19,7 @@ library(terra)
 
 # Define coordinate uncertainty and minimum number of occurrences
 COORDINATE_UNCERTAINTY = 1000
-MIN_NUM_OCCURRENCES = 25
+MIN_NUM_OCCURRENCES = 3
 
 # Define Coordinate Reference System (CRS):
 COORD_REF_SYSTEM = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
@@ -41,7 +41,8 @@ species_island_data[, names(species_island_data) != "species_name"] <-
   base::apply(species_island_data[, names(species_island_data) != "species_name"], 2, function(x){x == 1}) # change binary to logical values
 
 # Load in DEM
-DEM_rast <- raster::raster("data/DEM/canaryclim_dem.tif", crs = COORD_REF_SYSTEM)
+DEM_rast <- raster::raster("data/DEM/canaryclim_dem.tif")
+DEM_rast <- raster::projectRaster(DEM_rast, crs = COORD_REF_SYSTEM)
 DEM_rast <- terra::rast(DEM_rast)
 
 # Calculate Terrain Ruggedness Index (TRI) raster from DEM
@@ -132,7 +133,7 @@ environmental_data <- compile_dataset(species_list = species_list,
 
 
  # DATASET COMPILATION (AGGREGATION TO SPECIES-LEVEL):----   
-environmental_data_summary_500_13 <- environmental_data_500m |> 
+environmental_data_summary_100_3 <- environmental_data_100m |> 
   group_by(phylum, order, family, genus, species) |> 
   summarise(num_occurrences = length(species),
             elevation_median = median(elevation, na.rm = T), # ELEVATION---
