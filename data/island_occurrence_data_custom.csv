@@ -39,6 +39,7 @@ Aeonium davidbramwellii,0,1,0,0,0,0,0
 Aeonium decorum,0,0,1,0,0,0,0
 Aeonium diplocyclum,1,1,1,0,0,0,0
 Aeonium dodrantale,0,0,0,1,0,0,0
+Aeonium escobarii,0,1,0,0,0,0,0
 Aeonium gomerense,0,0,1,0,0,0,0
 Aeonium goochiae,0,1,0,0,0,0,0
 Aeonium haworthii,0,1,0,1,0,0,0
@@ -258,6 +259,8 @@ Asteriscus sericeus,1,0,0,1,1,1,0
 Astragalus boeticus,1,0,0,1,1,0,1
 Astragalus edulis,0,0,0,0,0,1,1
 Astragalus hamosus,1,1,1,1,1,1,1
+Astragalus mareoticus,0,0,0,0,0,1,1
+Astragalus pelecinus,1,1,1,1,1,1,1
 Astragalus sinaicus,0,0,0,0,0,1,1
 Astragalus solandri,0,0,1,1,1,1,1
 Astragalus stella,0,0,0,0,0,1,1
@@ -932,6 +935,7 @@ Foeniculum vulgare,1,1,1,1,1,1,1
 Forsskaolea angustifolia,1,1,1,1,1,1,1
 Fragaria vesca,1,0,0,1,0,0,0
 Frankenia boissieri,0,0,0,0,1,1,1
+Frankenia capitata,1,1,1,1,1,1,1
 Frankenia ericifolia,1,1,1,1,1,1,1
 Frankenia hirsuta,1,1,1,1,1,1,1
 Frankenia pulverulenta,1,0,0,1,1,1,1
@@ -1041,6 +1045,7 @@ Helianthemum salicifolium,0,0,1,0,1,0,0
 Helianthemum teneriffae,0,0,0,1,0,0,0
 Helianthemum tholiforme,0,0,0,0,1,0,0
 Helianthemum thymiphyllum,0,0,0,0,0,1,1
+Helianthemum tibiabinae,0,0,0,0,0,1,0
 Helianthemum villosum,0,0,0,0,0,1,0
 Helianthus annuus,0,1,0,1,0,1,0
 Helichrysum alucense,0,0,1,0,0,0,0
@@ -1642,6 +1647,7 @@ Pericallis multiflora,0,0,0,1,0,0,0
 Pericallis murrayi,1,0,0,0,0,0,0
 Pericallis papyracea,0,1,0,0,0,0,0
 Pericallis steetzii,0,0,1,0,0,0,0
+Pericallis tirmensis,0,0,0,0,1,0,0
 Pericallis tussilaginis,0,0,0,1,1,0,0
 Pericallis webbii,0,0,0,0,1,0,0
 Periploca laevigata,1,1,1,1,1,1,1
@@ -1748,6 +1754,7 @@ Polycarpaea aristata,0,1,0,1,1,0,0
 Polycarpaea carnosa,0,0,1,1,1,0,0
 Polycarpaea corymbosa,0,0,1,1,1,0,0
 Polycarpaea divaricata,1,1,1,1,1,1,1
+Polycarpaea filifolia,0,0,1,1,1,0,0
 Polycarpaea latifolia,0,0,1,1,1,0,0
 Polycarpaea nivea,0,1,0,1,1,1,1
 Polycarpaea robusta,0,0,0,0,0,0,1
@@ -1805,6 +1812,7 @@ Pterocephalus lasiospermus,0,0,0,1,0,0,0
 Pterocephalus porphyranthus,0,1,0,0,0,0,0
 Pterocephalus virens,0,0,0,1,0,0,0
 Puccinellia maritima,0,0,0,1,0,0,0
+Pulicaria arabica,0,0,1,1,1,0,0
 Pulicaria burchardii,0,0,0,0,0,1,0
 Pulicaria canariensis,0,0,0,0,0,1,1
 Pulicaria odora,0,0,0,0,1,0,0
@@ -1863,8 +1871,12 @@ Ridolfia segetum,0,0,0,1,1,0,1
 Robinia pseudoacacia,0,0,0,0,1,0,0
 Roldana petasitis,0,0,0,1,1,0,0
 Romulea columnae,1,1,1,1,1,1,1
+Rosa cannadas-teydensis,0,0,0,1,0,0,0
 Rosa canina,0,1,1,1,1,0,0
+Rosa gran-canariae,0,0,0,0,1,0,0
 Rosa micrantha,1,0,0,0,0,0,0
+Rosa nitidula,0,0,1,0,1,0,0
+Rosa roque-muchachensis,0,1,0,0,0,0,0
 Rosa rubiginosa,0,0,0,0,1,0,0
 Rostraria cristata,1,1,1,1,1,1,1
 Rostraria pumila,1,1,0,1,1,1,1
@@ -1900,6 +1912,7 @@ Ruta microcarpa,0,0,1,0,0,0,0
 Ruta oreojasme,0,0,0,0,1,0,0
 Ruta pinnata,0,1,0,1,0,0,0
 Rutheopsis herbanica,0,0,0,0,0,1,1
+Rutheopsis tortuosa,1,1,1,1,1,0,0
 Sabulina mediterranea,0,0,1,0,0,0,0
 Saccharum officinarum,0,0,0,1,1,0,0
 Sagina apetala,1,1,1,1,1,1,1
@@ -2225,8 +2238,10 @@ Teucrium spinosum,0,0,0,1,1,0,0
 Theligonum cynocrambe,0,1,1,1,1,0,0
 Thelocactus hastifer,0,0,0,1,0,0,0
 Thelypteris dentata,0,1,1,1,1,0,0
+Thesium canariense,0,0,0,0,1,0,0
 Thesium canariensis,0,0,0,0,1,0,0
 Thesium humile,0,1,1,1,1,1,1
+Thesium palmense,0,1,0,0,0,0,0
 Thesium psilotocladum,0,0,0,1,0,0,0
 Thesium retamoides,0,1,0,1,0,0,0
 Thesium subsucculentum,0,0,0,1,0,0,0
@@ -2250,6 +2265,7 @@ Tolpis proustii,1,0,1,0,0,0,0
 Tolpis santosii,0,1,0,0,0,0,0
 Tolpis umbellata,1,1,1,1,1,1,1
 Tolpis webbii,0,0,0,1,0,0,0
+Torilis africana,1,1,1,1,1,0,0
 Torilis arvensis,1,1,0,1,0,1,1
 Torilis elongata,1,1,1,1,1,1,1
 Torilis leptophylla,1,1,1,1,0,1,1
