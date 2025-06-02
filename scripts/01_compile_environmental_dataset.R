@@ -2,8 +2,8 @@
 ## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center
 # This file contains the script that collects environmental data for a list of plant species
 # Author: Lucas Jansen (l.s.jansen98@gmail.com)
-# Date: 04/04/2024
-# Written using R version 4.3.3
+# Date: 13/02/2025
+# Written using R version 4.4.1
 
 # Preliminaries:----
 # Libraries:
@@ -19,7 +19,7 @@ library(terra)
 
 # Define coordinate uncertainty and minimum number of occurrences
 COORDINATE_UNCERTAINTY = 1000
-MIN_NUM_OCCURRENCES = 3
+MIN_NUM_OCCURRENCES = 13
 
 # Define Coordinate Reference System (CRS):
 COORD_REF_SYSTEM = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
@@ -102,15 +102,17 @@ interception_rast <- raster::projectRaster(interception_rast, crs = COORD_REF_SY
 
 # Load in species list:
 species_list <- read.csv('data/species_list.csv')
+species_list_extended <- read.csv('data/species_list_extended.csv')
 
 # Load in growth form list:
 growth_form_list <- read.csv('data/growth_form_list.csv') 
+growth_form_list_extended <- read.csv('data/growth_form_list_extended.csv') 
 
 # Remove missing species (n = 44) from species_list
 species_list <- species_list[!species_list$missing, ] # exclude species from list (no occurrence data)
 
 # OCCURRENCE DATA EXTRACTION/FILTERING + ENVIRONMENTAL VARIABLES EXTRACTION:----
-environmental_data <- compile_dataset(species_list = species_list, 
+environmental_data <- compile_dataset(species_list = species_list_extended, 
                                       shape_file = shape_file, 
                                       centroid_ref = centroid_ref,
                                       institutions_ref = institutions_ref,
@@ -131,9 +133,8 @@ environmental_data <- compile_dataset(species_list = species_list,
                                       transpiration_rast = transpiration_rast,
                                       interception_rast = interception_rast)
 
-
- # DATASET COMPILATION (AGGREGATION TO SPECIES-LEVEL):----   
-environmental_data_summary_100_3 <- environmental_data_100m |> 
+# DATASET COMPILATION (AGGREGATION TO SPECIES-LEVEL):----   
+environmental_data_aggregate_500_13 <- environmental_data_100m |> 
   group_by(phylum, order, family, genus, species) |> 
   summarise(num_occurrences = length(species),
             elevation_median = median(elevation, na.rm = T), # ELEVATION---
@@ -168,8 +169,8 @@ environmental_data_summary_100_3 <- environmental_data_100m |>
   #            )
   #          )/1000000, # convert range size from m^2 to km^2
   #          2)) |> # round to 2 decimals
-  left_join(growth_form_list[, c('species', 'growth_form')], by = 'species') |> # Add growth form column 
+  left_join(growth_form_list[, c('species_name', 'growth_form')], join_by = c('species' == 'species_name')) |> # Add growth form column 
   st_drop_geometry() |> # remove geometry attribute
   dplyr::ungroup() 
   
-write.csv(environmental_data_1000m, file = 'data/output_data/environmental_dataset_full_1000m.csv')
+write.csv(environmental_data_1000m_extended, file = 'data/output_data/environmental_dataset_extended_1000m.csv')

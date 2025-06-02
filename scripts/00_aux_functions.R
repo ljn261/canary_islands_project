@@ -2,8 +2,8 @@
 ## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center
 # This file contains a collection of functions used to extract plant trait data
 # Author: Lucas Jansen (l.s.jansen98@gmail.com)
-# Date: 04/04/2024
-# Written using R version 4.3.3
+# Date: 13/02/2025
+# Written using R version 4.4.1
 
 
 extract_locality_data <- function(binomial_name){
@@ -206,10 +206,10 @@ compile_dataset <- function(species_list,
                             evaporation_rast,
                             transpiration_rast,
                             interception_rast){
-  
+
   start_time = Sys.time() # track time of compilation
   pb <- txtProgressBar(min = 0, max = length(species_list$species_name), style = 3)
-  
+
   report_columns = c('family', 
                      'genus', 
                      'species_original',
@@ -359,4 +359,80 @@ compile_dataset <- function(species_list,
   return(environmental_data)
 }
 
+run_phylo_pca <- function(environmental_data, phylo_tree) {
+  species_overlap <- phylo_tree$tip.label[phylo_tree$tip.label %in% environmental_data$species]
+  
+  message(sprintf("Running Phylogenetic PCA...\n %s percent of input species (%s) are retained", round(length(species_overlap)/length(environmental_data$species) * 100, 2), length(species_overlap)))
+  
+  phylo_pca_data <- environmental_data |>
+    dplyr::select(
+      species,
+      elevation_mad,
+      #elevation_median,
+      TRI_median,
+      #annual_temp,
+      #diurnal_temp_range_median,
+      temp_seasonality,
+      #temp_driest_quarter,
+      temp_coldest_quarter,
+      annual_precip,
+      #precip_driest_quarter,
+      precip_seasonality,
+      #evapotranspiration,
+      evaporation,
+      #transpiration,
+      interception,
+      aridity_index) |>
+    dplyr::filter(species %in% species_overlap) |>
+    tibble::column_to_rownames('species') |>
+    dplyr::mutate(dplyr::across(dplyr::everything(), ~ log(.x + 1))) |>
+    base::scale()
+  
+  phylo_tree_phylomaker_trimmed <- ape::keep.tip(phy = phylo_tree, tip = species_overlap) # keep only species in filtered environmental dataset
+  
+  phylo_pca_results <- phytools::as.prcomp(phytools::phyl.pca(tree = phylo_tree_phylomaker_trimmed, Y = phylo_pca_data))
+  
+  return(phylo_pca_results)
+}
 
+plot_3d_phylo_pca <- function(environmental_data, phylo_tree) {
+  phylo_pca_results <- run_phylo_pca(environmental_data = environmental_data,
+                                     phylo_tree = phylo_tree)
+  
+  growth_form_labels <- as.data.frame(phylo_pca_results$x) |>
+    tibble::rownames_to_column('species') |>
+    dplyr::select(species) |>
+    dplyr::left_join(dplyr::select(environmental_data, species, growth_form), by = 'species')
+  
+  phylo_pca_plot <- plotly::plot_ly(data = base::data.frame(phylo_pca_results$x),
+                                    x = ~PC1,
+                                    y = ~PC2,
+                                    z = ~PC3,
+                                    text = rownames(phylo_pca_results$x),
+                                    color = growth_form_labels$growth_form
+  ) |>
+    plotly::add_markers(size = 4)
+  
+  # Extract loadings and scale them for plotting
+  loadings <- as.data.frame(phylo_pca_results$rotation)
+  scaling_factor <- 4  # Adjust based on your PCA range for visual clarity
+  loadings_scaled <- loadings * scaling_factor
+  
+  # Add loadings as lines:
+  for (i in 1:nrow(loadings_scaled)) {
+    phylo_pca_plot <- phylo_pca_plot |>
+      plotly::add_trace(
+        x = c(0, loadings_scaled[i, "PC1"]),
+        y = c(0, loadings_scaled[i, "PC2"]),
+        z = c(0, loadings_scaled[i, "PC3"]),
+        type = "scatter3d",
+        mode = "lines",
+        line = list(color = 'black', width = 2),
+        #marker = list(size = 4),
+        name = rownames(loadings_scaled)[i],
+        inherit = FALSE,
+        showlegend = FALSE
+      )
+  }
+  return(phylo_pca_plot)
+}
