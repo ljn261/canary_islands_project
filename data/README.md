@@ -5,6 +5,7 @@ This folder contains the (raw) data used in our study
 - `./environmental_data/`: folder containing the environmental raster layers used in this study to extract environmental variables, inluding FAO WAPOR-3 evapotranspiration data and CanaryClim data.
 - `./gadm_land_3/`: folder containing shape file of Canary Islands defining the coordinates of its land masses, as extracted from the [Database of Global Administrative Areas (GADM)](https://gadm.org/)
 - `./output_data/`: folder where environmental dataset (.csv) will be written
+- `./plant_images/`: folder containing images of species used in one of the figures
 - `./centroid_ref_custom.csv`: .csv file containing a custom list of island centroids used in filtering species occurrences
 - `./growth_form_list.csv`: .csv file containing the list of species and associated growth forms
 - `./institutions_ref_custom.csv`: .csv file containing a custom list of (botanical) institutions used in filtering species occurrences
