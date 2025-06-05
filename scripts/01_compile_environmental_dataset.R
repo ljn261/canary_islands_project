@@ -18,8 +18,8 @@ library(raster)
 library(terra)
 
 # Define coordinate uncertainty and minimum number of occurrences
-COORDINATE_UNCERTAINTY = 1000
-MIN_NUM_OCCURRENCES = 13
+COORDINATE_UNCERTAINTY = 100
+MIN_NUM_OCCURRENCES = 25
 
 # Define Coordinate Reference System (CRS):
 COORD_REF_SYSTEM = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
@@ -112,6 +112,7 @@ growth_form_list_extended <- read.csv('data/growth_form_list_extended.csv')
 species_list <- species_list[!species_list$missing, ] # exclude species from list (no occurrence data)
 
 # OCCURRENCE DATA EXTRACTION/FILTERING + ENVIRONMENTAL VARIABLES EXTRACTION:----
+## The following step requires a (stable) internet connection and can have a long run-time depending on the number of species
 environmental_data <- compile_dataset(species_list = species_list_extended, 
                                       shape_file = shape_file, 
                                       centroid_ref = centroid_ref,
@@ -134,43 +135,28 @@ environmental_data <- compile_dataset(species_list = species_list_extended,
                                       interception_rast = interception_rast)
 
 # DATASET COMPILATION (AGGREGATION TO SPECIES-LEVEL):----   
-environmental_data_aggregate_500_13 <- environmental_data_100m |> 
+environmental_data_aggregate_100_25 <- environmental_data_100m_extended |> 
   group_by(phylum, order, family, genus, species) |> 
-  summarise(num_occurrences = length(species),
-            elevation_median = median(elevation, na.rm = T), # ELEVATION---
-            elevation_mad = mad(elevation, na.rm = T),
-            TRI_median = median(TRI, na.rm = T), # TRI---
-            annual_temp = median(annual_temp, na.rm = T), # TEMPERATURE---
-            diurnal_temp_range_median = median(diurnal_temp_range, na.rm = T),
-            temp_seasonality = median(temp_seasonality, na.rm = T),
-            temp_driest_quarter = median(temp_driest_quarter, na.rm = T),
-            temp_coldest_quarter = median(temp_coldest_quarter, na.rm = T),
-            annual_precip = median(annual_precip, na.rm = T), # PRECIPITATION---
-            precip_driest_quarter = median(precip_driest_quarter, na.rm = T),
-            precip_seasonality = median(precip_seasonality, na.rm = T),
-            evapotranspiration = median(evapotranspiration, na.rm = T), # EVAPOTRANSPIRATION---
-            evaporation = median(evaporation, na.rm = T),
-            transpiration = median(transpiration, na.rm = T),
-            interception = median(interception, na.rm = T),
-            aridity_index = annual_precip/evapotranspiration) |>
-  filter(num_occurrences >= MIN_NUM_OCCURRENCES) |> 
-  mutate(range_size = geometry |>
-           st_combine() |>
-           st_concave_hull(0.1) |>
-           st_area() |>
-           as.numeric() / 1000000 |>
-           round(2)) |>
-  # mutate(#habitat = lapply(strsplit(habitat, ",", TRUE), as.numeric),
-  #        range_size = round( # Calculate range size: ---
-  #          as.numeric(st_area( # calculate area of convex hull
-  #              st_convex_hull( # create convex hull around points
-  #                st_combine(geometry)
-  #              )
-  #            )
-  #          )/1000000, # convert range size from m^2 to km^2
-  #          2)) |> # round to 2 decimals
-  left_join(growth_form_list[, c('species_name', 'growth_form')], join_by = c('species' == 'species_name')) |> # Add growth form column 
+  summarise(num_occurrences = length(species), # Count number of occurrences per species
+            elevation_median = median(elevation, na.rm = T), # Elevation median
+            elevation_mad = mad(elevation, na.rm = T), # Elevation (MAD)
+            TRI_median = median(TRI, na.rm = T), # Terrain Ruggedness Index
+            annual_temp = median(annual_temp, na.rm = T), # Annual temperature
+            diurnal_temp_range_median = median(diurnal_temp_range, na.rm = T), # Diurnal temperature range
+            temp_seasonality = median(temp_seasonality, na.rm = T), # Temperature seasonality
+            temp_driest_quarter = median(temp_driest_quarter, na.rm = T), # Temperature driest quarter
+            temp_coldest_quarter = median(temp_coldest_quarter, na.rm = T), # Temperature coldest quarter
+            annual_precip = median(annual_precip, na.rm = T), # Annual precipitation
+            precip_driest_quarter = median(precip_driest_quarter, na.rm = T), # Precipitation driest quarter
+            precip_seasonality = median(precip_seasonality, na.rm = T), # Precipitation seasonality
+            evapotranspiration = median(evapotranspiration, na.rm = T), # Evapotranspiration
+            evaporation = median(evaporation, na.rm = T), # Evaporation
+            transpiration = median(transpiration, na.rm = T), # Transpiration
+            interception = median(interception, na.rm = T), # Interception
+            aridity_index = annual_precip/evapotranspiration) |> # Aridity Index
+  filter(num_occurrences >= MIN_NUM_OCCURRENCES) |> # Apply sampling approach
+  left_join(growth_form_list_extended[, c('species', 'growth_form')], by = 'species') |> # Add growth form column 
   st_drop_geometry() |> # remove geometry attribute
   dplyr::ungroup() 
   
-write.csv(environmental_data_1000m_extended, file = 'data/output_data/environmental_dataset_extended_1000m.csv')
+write.csv(environmental_data_100m_extended, file = 'data/output_data/environmental_dataset_extended_100m.csv')
