@@ -100,11 +100,9 @@ interception_rast <- raster::raster('data/environmental_data/WaPOR-3/I/WaPORV3_a
 interception_rast <- raster::projectRaster(interception_rast, crs = COORD_REF_SYSTEM)
 
 # Load in species list:
-species_list <- read.csv('data/species_list.csv')
 species_list_extended <- read.csv('data/species_list_extended.csv')
 
 # Load in growth form list:
-growth_form_list <- read.csv('data/growth_form_list.csv') 
 growth_form_list_extended <- read.csv('data/growth_form_list_extended.csv') 
 
 # Remove missing species (n = 44) from species_list
