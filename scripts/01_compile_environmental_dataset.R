@@ -1,5 +1,4 @@
-## ------------------------------
-## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center
+## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center----
 # This file contains the script that collects environmental data for a list of plant species
 # Author: Lucas Jansen (l.s.jansen98@gmail.com)
 # Date: 13/02/2025
