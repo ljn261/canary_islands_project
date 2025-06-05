@@ -110,29 +110,29 @@ species_list <- species_list[!species_list$missing, ] # exclude species from lis
 
 # OCCURRENCE DATA EXTRACTION/FILTERING + ENVIRONMENTAL VARIABLES EXTRACTION:----
 ## The following step requires a (stable) internet connection and can have a long run-time depending on the number of species
-environmental_data <- compile_dataset(species_list = species_list_extended, 
-                                      shape_file = shape_file, 
-                                      centroid_ref = centroid_ref,
-                                      institutions_ref = institutions_ref,
-                                      species_island_data = species_island_data,
-                                      uncertainty_limit = COORDINATE_UNCERTAINTY,
-                                      DEM_rast = DEM_rast,
-                                      TRI_rast = TRI_rast,
-                                      bioclim1_rast = bioclim1_rast,
-                                      bioclim2_rast = bioclim2_rast,
-                                      bioclim4_rast = bioclim4_rast,
-                                      bioclim9_rast = bioclim9_rast,
-                                      bioclim11_rast = bioclim11_rast,
-                                      bioclim12_rast = bioclim12_rast,
-                                      bioclim15_rast = bioclim15_rast,
-                                      bioclim17_rast = bioclim17_rast,
-                                      evapotranspiration_rast = evapotranspiration_rast,
-                                      evaporation_rast = evaporation_rast,
-                                      transpiration_rast = transpiration_rast,
-                                      interception_rast = interception_rast)
+environmental_dataset_full <- compile_dataset(species_list = species_list_extended, 
+                                              shape_file = shape_file, 
+                                              centroid_ref = centroid_ref,
+                                              institutions_ref = institutions_ref,
+                                              species_island_data = species_island_data,
+                                              uncertainty_limit = COORDINATE_UNCERTAINTY,
+                                              DEM_rast = DEM_rast,
+                                              TRI_rast = TRI_rast,
+                                              bioclim1_rast = bioclim1_rast,
+                                              bioclim2_rast = bioclim2_rast,
+                                              bioclim4_rast = bioclim4_rast,
+                                              bioclim9_rast = bioclim9_rast,
+                                              bioclim11_rast = bioclim11_rast,
+                                              bioclim12_rast = bioclim12_rast,
+                                              bioclim15_rast = bioclim15_rast,
+                                              bioclim17_rast = bioclim17_rast,
+                                              evapotranspiration_rast = evapotranspiration_rast,
+                                              evaporation_rast = evaporation_rast,
+                                              transpiration_rast = transpiration_rast,
+                                              interception_rast = interception_rast)
 
 # DATASET COMPILATION (AGGREGATION TO SPECIES-LEVEL):----   
-environmental_data_aggregate_100_25 <- environmental_data_100m_extended |> 
+environmental_dataset_aggregate <- environmental_data_100m_extended |> 
   group_by(phylum, order, family, genus, species) |> 
   summarise(num_occurrences = length(species), # Count number of occurrences per species
             elevation_median = median(elevation, na.rm = T), # Elevation median
@@ -155,5 +155,6 @@ environmental_data_aggregate_100_25 <- environmental_data_100m_extended |>
   left_join(growth_form_list_extended[, c('species', 'growth_form')], by = 'species') |> # Add growth form column 
   st_drop_geometry() |> # remove geometry attribute
   dplyr::ungroup() 
-  
-write.csv(environmental_data_100m_extended, file = 'data/output_data/environmental_dataset_extended_100m.csv')
+
+write.csv(environmental_dataset_full, file = 'data/output_data/environmental_dataset_full.csv')
+write.csv(environmental_dataset_aggregate, file = 'data/output_data/environmental_dataset_aggregate.csv')

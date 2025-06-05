@@ -1,4 +1,4 @@
-## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center
+## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center----
 # This file contains a collection of functions used to extract/clean plant trait data
 # Author: Lucas Jansen (l.s.jansen98@gmail.com)
 # Date: 05/06/2025
@@ -363,19 +363,12 @@ run_phylo_pca <- function(environmental_data, phylo_tree) {
     dplyr::select(
       species,
       elevation_mad,
-      #elevation_median,
       TRI_median,
-      #annual_temp,
-      #diurnal_temp_range_median,
       temp_seasonality,
-      #temp_driest_quarter,
       temp_coldest_quarter,
       annual_precip,
-      #precip_driest_quarter,
       precip_seasonality,
-      #evapotranspiration,
       evaporation,
-      #transpiration,
       interception,
       aridity_index) |>
     dplyr::filter(species %in% species_overlap) |>
