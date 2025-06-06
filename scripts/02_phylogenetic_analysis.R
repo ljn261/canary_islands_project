@@ -4,9 +4,10 @@
 # Date: 05/06/2025
 # Written using R version 4.4.1
 
+# Source functions used in this script from '00_aux_functions.R'
 source('../scripts/00_aux_functions.R')
 
-# Environmental dataset of balanced approach:
+# Environmental dataset of balanced sampling approach:
 environmental_dataset <- read.csv("./data/output_data/environmental_dataset_balanced_aggregate.csv")
 
 # 1. Correlation analysis----
@@ -95,6 +96,6 @@ phylo_pca_plot
 phytools::phylANOVA(tree = phylo_tree_phylomaker$scenario.3, 
                     x = environmental_dataset$growth_form, 
                     y = environmental_dataset$TRI_median, # Adjust environmental variable
-                    nsim = 3000,
+                    nsim = 1000,
                     posthoc = TRUE,
                     p.adj = "holm")
