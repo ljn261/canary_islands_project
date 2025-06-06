@@ -1,0 +1,815 @@
+---
+title: "Creating figures for publication"
+author: "L.S. Jansen"
+date: "2025-06-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source('../scripts/00_aux_functions.R')
+```
+
+# Publication Figures
+This script needs the following variables to run:
+```{r}
+environmental_dataset <- readr::read_csv("../data/output_data/environmental_dataset_balanced_aggregate.csv")
+environmental_dataset_full <- readr::read_csv("../data/output_data/environmental_dataset_balanced_full.csv") |>
+  dplyr::mutate( # Extra code needed to convert character column to geometry object
+    geometry = purrr::map(
+      geometry,
+      ~ as.numeric(stringr::str_extract_all(.x, "\\d+(\\.\\d+)?")[[1]])
+    )
+  ) |>
+  dplyr::mutate(
+    geometry = purrr::map(geometry, ~ sf::st_point(.x))
+  ) |>
+  sf::st_as_sf(sf_column_name = "geometry", crs = 4326)
+```
+
+## Correlation analysis:
+```{r}
+environmental_dataset |> 
+  dplyr::select(
+    elevation_mad,
+    elevation_median,
+    TRI_median,
+    annual_temp,
+    diurnal_temp_range_median,
+    temp_seasonality,
+    temp_driest_quarter,
+    temp_coldest_quarter,
+    annual_precip,
+    precip_driest_quarter,
+    precip_seasonality,
+    evapotranspiration,
+    evaporation,
+    transpiration,
+    interception,
+    aridity_index) |>
+  stats::cor(method = 'kendall', use="pairwise.complete.obs") |>
+  ggcorrplot::ggcorrplot(lab = TRUE, lab_size = 2.5) -> p1
+
+environmental_dataset |> 
+  dplyr::select(
+    elevation_mad,
+    TRI_median,
+    temp_seasonality,
+    temp_coldest_quarter,
+    annual_precip,
+    precip_seasonality,
+    evaporation,
+    interception,
+    aridity_index) |>
+  stats::cor(method = 'kendall', use="pairwise.complete.obs") |>
+  ggcorrplot::ggcorrplot(lab = TRUE) -> p2
+
+ggpubr::ggarrange(p1, p2, ncol = 2, labels = c("a.", "b."))
+```
+
+
+## Phylogenetic PCA:
+Plot with all 
+```{r}
+phylo_pca_labelled <- as.data.frame(phylo_pca$x) |>
+  tibble::rownames_to_column('species') |>
+  dplyr::left_join(dplyr::select(environmental_dataset, species, growth_form), by = 'species') # add growth form label
+
+loadings <- as.data.frame(phylo_pca$rotation[, 1:2])  # First two PCs
+loadings$Variable <- rownames(loadings)  # Variable names
+loadings <- transform(loadings, PC1 = PC1 * 5, PC2 = PC2 * 5)
+
+ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
+  ggplot2::geom_point(size = 3, alpha = 0.8) +
+  # Add ellipse:
+  ggplot2::stat_ellipse(ggplot2::aes(fill = growth_form), alpha = 0.2, geom = "polygon") +
+  # Add variable loadings (arrows):
+  ggplot2::geom_segment(data = loadings, ggplot2::aes(x = 0, y = 0, xend = PC1, yend = PC2), 
+                        arrow = ggplot2::arrow(length = ggplot2::unit(0.2, "inches")), color = "black",
+                        linewidth = 1) +
+  # Add labels for variable loadings:
+  ggrepel::geom_text_repel(data = loadings, ggplot2::aes(x = PC1, y = PC2, label = Variable), 
+                           size = 5, color = "black", bg.color = 'white') +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "PCA of Climatic Variables",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::scale_color_manual(values = c(
+    "Annual Herbaceous" = "#ABA300",
+    "Perennial Herbaceous" = "#ED68ED",
+    "Insular Woodiness" = "#00A9FF",
+    "Derived Woodiness" =  "#00BE67",
+    "Ancestral Woodiness" = "#F8766D"
+  )) +
+  ggplot2::scale_fill_manual(values = c(
+    "Annual Herbaceous" = "#ABA300",
+    "Perennial Herbaceous" = "#ED68ED",
+    "Insular Woodiness" = "#00A9FF",
+    "Derived Woodiness" =  "#00BE67",
+    "Ancestral Woodiness" = "#F8766D"
+  )) +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+```
+Plotting contribution of loadings:
+```{r}
+factoextra::fviz_cos2(phylo_pca_100_25, choice = "var", axes = 1) +
+  ggplot2::labs(title = "First PC", y = "")-> p1
+factoextra::fviz_cos2(phylo_pca_100_25, choice = "var", axes = 2) +
+  ggplot2::labs(title = "Second PC", y = "")-> p2
+```
+PCA plot with selection of species highlighted:
+```{r}
+image_dataframe <- data.frame(
+  species = c('Mespilodaphne foetens', 'Echium wildpretii', 'Laurus novocanariensis', 'Convolvulus floridus', 'Tamarix canariensis', 'Euphorbia handiensis', 'Viola cheiranthifolia', 'Cistus symphytifolius', 'Adenocarpus foliolosus', 'Bosea yervamora'),
+  x = c(5.5, -5.2, 4.2, 1,-1, -5, -4, -1, 2, 3),     # manually set X positions
+  y = c(1, -1.5, -3, 4.5, 5, 3.5, -4.5, -4.5, -4, 3.5),       # manually set Y positions
+  image = c("../data/plant_images/mespilodaphne_foetens.png",
+            "../data/plant_images/echium_wildpretii.png",
+            "../data/plant_images/laurus_novocanariensis.png",
+            "../data/plant_images/convolvulus floridus.png",
+            "../data/plant_images/tamarix_canariensis.png",
+            "../data/plant_images/euphorbia_handiensis.png",
+            "../data/plant_images/viola_cheiranthifolia.png",
+            "../data/plant_images/cistus_symphytifolius.png",
+            "../data/plant_images/adenocarpus_foliolosus.png",
+            "../data/plant_images/bosea_yervamora.png"),
+  size = c(0.35, 0.25, 0.25, 0.25, 0.2, 0.3, 0.3, 0.2, 0.3, 0.2)
+)
+
+arrow_dataframe <- merge(
+  image_dataframe,
+  phylo_pca_500_13_labelled[, c("species", "PC1", "PC2")],
+  by = "species"
+)
+
+highlight_species <- c('Mespilodaphne foetens' = "darkgreen", 
+                       'Echium wildpretii' = "red", 
+                       'Laurus novocanariensis' = "darkgreen", 
+                       'Convolvulus floridus' = "darkblue",
+                       'Tamarix canariensis' = "orange",
+                       'Euphorbia handiensis' = "orange",
+                       'Viola cheiranthifolia' = "red",
+                       'Cistus symphytifolius' = "purple",
+                       'Adenocarpus foliolosus' = "purple",
+                       'Bosea yervamora' = "darkblue")
+
+ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2)) +
+  # Segments
+  ggplot2::geom_segment(
+    data = arrow_dataframe,
+    ggplot2::aes(x = PC1, y = PC2, xend = x, yend = y),
+    color = "darkgrey",
+    linewidth = 0.5,
+    linetype = 2
+  ) +
+  # Grey background points:
+  ggplot2::geom_point(
+    data = subset(phylo_pca_labelled, !(species %in% names(highlight_species))),
+    color = "grey80", alpha = 0.4) +
+  # Colored highlight points
+  ggplot2::geom_point(
+    data = subset(phylo_pca_labelled, species %in% names(highlight_species)),
+    ggplot2::aes(color = species), size = 3
+  ) +
+  ggplot2::scale_color_manual(values = highlight_species) +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "none") +
+  ggimage::geom_image(data = image_dataframe,
+                      ggplot2::aes(x = x, y = y, image = image, size = size)) +
+  ggplot2::scale_size_identity() +
+  ggplot2::geom_text(x = -3, y = 4.7, label = "Coastal \n specialists", color = "orange", fontface = "bold") +
+  ggplot2::geom_text(x = -2.5, y = -3.5, label = "High mountain \n specialists", color = "red", fontface = "bold") +
+  ggplot2::geom_text(x = 1, y = 1.8, label = "Thermo-sclerophilous \n specialists", color = "darkblue", fontface = "bold") +
+  ggplot2::geom_text(x = 2.8, y = 0.5, label = "Laurisilva specialists", color = "darkgreen", fontface = "bold") +
+  ggplot2::geom_text(x = 0.5, y = -3, label = "Pinewood specialists", color = "purple", fontface = "bold")
+```
+
+PCA plot of herbaceous versus woody niche:
+```{r}
+phylo_pca_labelled_grouped <- as.data.frame(phylo_pca$x) |>
+  tibble::rownames_to_column('species') |>
+  dplyr::left_join(dplyr::select(environmental_dataset, species, growth_form), by = 'species') |> # add growth form label
+  dplyr::mutate(growth_form = dplyr::case_when(
+    stringr::str_detect(growth_form, "Herbaceous") ~ "Herbaceous",
+    stringr::str_detect(growth_form, "Woodiness") ~ "Woodiness"))
+
+ggplot2::ggplot(phylo_pca_labelled_grouped, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
+  ggplot2::geom_point(size = 3, alpha = 0.8) +
+  # Add ellipse:
+  ggplot2::stat_ellipse(ggplot2::aes(fill = growth_form), alpha = 0.2, geom = "polygon") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+```
+PCA plot, highlighting growth forms separately
+```{r}
+# ANNUAL HERBACEOUS
+phylo_pca_labelled |>
+  dplyr::filter(growth_form == 'Annual Herbaceous')|>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
+  # Add contour:
+  ggplot2::stat_density2d(colour = "grey") +
+  # Add points:
+  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#ABA300") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "AH",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+
+# PERENNIAL HERBACEOUS
+phylo_pca_labelled |>
+  dplyr::filter(growth_form == 'Perennial Herbaceous')|>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
+  # Add contour:
+  ggplot2::stat_density2d(colour = "grey") +
+  # Add points:
+  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#ED68ED") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "PH",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+
+# INSULAR WOODINESS
+phylo_pca_labelled |>
+  dplyr::filter(growth_form == 'Insular Woodiness')|>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
+  # Add contour:
+  ggplot2::stat_density2d(colour = "grey") +
+  # Add points:
+  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#00A9FF") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "IW",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+
+# DERIVED WOODINESS
+phylo_pca_labelled |>
+  dplyr::filter(growth_form == 'Derived Woodiness')|>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
+  # Add contour:
+  ggplot2::stat_density2d(colour = "grey") +
+  # Add points:
+  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#00BE67") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "DW",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+
+# ANCESTRAL WOODINESS
+phylo_pca_labelled |>
+  dplyr::filter(growth_form == 'Ancestral Woodiness')|>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
+  # Add contour:
+  ggplot2::stat_density2d(colour = "grey") +
+  # Add points:
+  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#F8766D") +
+  ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
+                y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
+                title = "AW",
+                color = 'Growth form',
+                fill = 'Growth form') +
+  ggplot2::xlim(-6, 6) +
+  ggplot2::ylim(-5.5, 6.5) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+```
+
+## Phylogenetic ANOVA results:
+The following results were obtained by using the phylANOVA function (see 02_phylogenetic_analysis.R for details), and running an ANOVA model per variable.
+```{r, echo=FALSE}
+custom_pvalues_elevationMAD_ANOVA <- data.frame(
+  .y. = "elevation_mad",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00 , 1.00, 0.24, 1.00, 1.00, 0.36, 1.00, 0.592, 1.00, 1.00), 
+  p.adj = c(1.00 , 1.00, 0.24, 1.00, 1.00, 0.36, 1.00, 0.592, 1.00, 1.00),
+  p.format = c(1.00 , 1.00, 0.24, 1.00, 1.00, 0.36, 1.00, 0.592, 1.00, 1.00),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(1500, 1600, 1700, 1800, 1700, 950, 1000, 1050, 1100, 1150)
+)
+custom_pvalues_TRI_ANOVA <- data.frame(
+  .y. = "TRI_median",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(0.010, 0.010, 0.108, 0.010, 0.035, 1.000, 0.884, 0.505, 1.000, 0.888), 
+  p.adj = c(0.010, 0.010, 0.108, 0.010, 0.035, 1.000, 0.884, 0.505, 1.000, 0.888),
+  p.format = c(0.010, 0.010, 0.108, 0.010, 0.035, 1.000, 0.884, 0.505, 1.000, 0.888),
+  p.signif = c("*", "*", "ns", "*", "*", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(220, 240, 260, 265, 300, 325, 315, 330, 320, 360)
+)
+custom_pvalues_temp_seasonality_ANOVA <- data.frame(
+  .y. = "temp_seasonality",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00, 0.04, 1.00, 1.00, 0.855, 1.00, 1.00, 1.00, 1.00, 1.00), 
+  p.adj = c(1.00, 0.04, 1.00, 1.00, 0.855, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.format = c(1.00, 0.04, 1.00, 1.00, 0.855, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.signif = c("ns", "*", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(350, 500, 360, 365, 425, 450, 380, 385, 390, 395)
+)
+custom_pvalues_temp_coldest_quarter_ANOVA <- data.frame(
+  .y. = "temp_coldest_quarter",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(0.16, 0.04 , 1.00, 1.00, 1.00, 0.196, 1.00, 0.126, 1.00, 1.00), 
+  p.adj = c(0.16, 0.04 , 1.00, 1.00, 1.00, 0.196, 1.00, 0.126, 1.00, 1.00),
+  p.format = c(0.16, 0.04 , 1.00, 1.00, 1.00, 0.196, 1.00, 0.126, 1.00, 1.00),
+  p.signif = c("ns", "*", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(22, 26, 24 ,5 , 6.5, 7, 7.5, 25, 8.5, 9)
+)
+custom_pvalues_annual_precip_ANOVA <- data.frame(
+  .y. = "annual_precip",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00, 0.287, 0.588, 0.588, 0.792, 0.040, 1.00, 0.030, 1.00, 0.036), 
+  p.adj = c(1.00, 0.287, 0.588, 0.588, 0.792, 0.040, 1.00, 0.030, 1.00, 0.036),
+  p.format = c(1.00, 0.287, 0.588, 0.588, 0.792, 0.040, 1.00, 0.030, 1.00, 0.036),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "*", "ns", "*", "ns", "*"),
+  method = "Phylo-ANOVA",
+  y.position = c(1100, 1150, 1200, 1250, 850, 1300, 900, 1450, 950, 1600)
+)
+custom_pvalues_evaporation_ANOVA <- data.frame(
+  .y. = "evaporation",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(0.954, 0.510, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00), 
+  p.adj = c(0.954, 0.510, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.format = c(0.954, 0.510, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(600, 650, 700, 400, 1, 1, 1, 1, 1, 1)
+)
+custom_pvalues_precip_seasonality_ANOVA <- data.frame(
+  .y. = "precip_seasonality",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(0.820, 0.820, 0.944, 0.063, 0.944, 0.248, 0.651, 0.651, 0.820, 0.030), 
+  p.adj = c(0.820, 0.820, 0.944, 0.063, 0.944, 0.248, 0.651, 0.651, 0.820, 0.030),
+  p.format = c(0.820, 0.820, 0.944, 0.063, 0.944, 0.248, 0.651, 0.651, 0.820, 0.030),
+  p.signif = c("ns", "ns", "ns", ".", "ns", "ns", "ns", "ns", "ns", "*"),
+  method = "Phylo-ANOVA",
+  y.position = c(105, 1, 1, 130, 1, 115, 1, 120, 1, 140)
+)
+custom_pvalues_interception_ANOVA <- data.frame(
+  .y. = "interception",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00, 1.00, 1.00, 0.261, 1.00, 1.00, 0.76, 1.00, 1.00, 0.08), 
+  p.adj = c(1.00, 1.00, 1.00, 0.261, 1.00, 1.00, 0.76, 1.00, 1.00, 0.08),
+  p.format = c(1.00, 1.00, 1.00, 0.261, 1.00, 1.00, 0.76, 1.00, 1.00, 0.08),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "."),
+  method = "Phylo-ANOVA",
+  y.position = c(16, 18, 20, 22, 24, 26, 28, 30, 32, 34)
+)
+custom_pvalues_aridity_index_ANOVA <- data.frame(
+  .y. = "aridity_index",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00), 
+  p.adj = c(1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.format = c(1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns"),
+  method = "Phylo-ANOVA",
+  y.position = c(1, 16, 1, 1, 1, 1, 18, 1, 20, 1)
+)
+```
+Plotting the violinplots/boxplots and displaying the ANOVA results in case there are significant differences between groups:
+```{r}
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "elevation_mad", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_elevationMAD_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = 'Elevation (MAD)') +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p1
+
+environmental_dataset |> 
+  dplyr::mutate(growth_form = factor(growth_form, 
+                                     levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                                     labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "TRI_median", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_TRI_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Terrain Ruggedness Index") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p2
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "temp_seasonality", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_temp_seasonality_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Temperature seasonality (°C * 100)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7)) -> p3
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "temp_coldest_quarter", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_temp_coldest_quarter_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Temperature coldest quarter (°C)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p4
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "annual_precip", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_annual_precip_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Annual precipitation (mm)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p5
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "evaporation", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_evaporation_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Evaporation (mm)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p6
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "precip_seasonality", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_precip_seasonality_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Precipitation seasonality (%)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p7
+
+environmental_dataset |> 
+  dplyr::mutate(growth_form = factor(growth_form, 
+                                     levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                                     labels = c("AH", "PH", "IW", "DW", "AW")),
+                interception = sqrt(interception)) |>
+  ggpubr::ggviolin(x = "growth_form", y = "interception", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_interception_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Sqrt(Interception) (mm)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p8
+
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "aridity_index", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_aridity_index_ANOVA, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Aridity index") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p9
+
+ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, ncol = 3, nrow = 3, 
+                  labels = c("a.", "b.", "c.", "d.", "e.", "f.", "g.", "h.", "i."))
+```
+## 4. Plot of TRI, highlighting IW:
+```{r}
+island_shape <- shape_file |>
+  dplyr::filter(island == "La Palma") |>
+  sf::st_set_crs(4326) |>
+  sf::st_transform(crs = terra::crs(TRI_rast)) 
+
+TRI_rast_island <- terra::mask(x = terra::crop(terra::rast(TRI_rast), raster::extent(island_shape)),
+                               mask = terra::vect(island_shape))
+
+tri_df <- raster::as.data.frame(TRI_rast_island, xy = TRUE)
+names(tri_df)[3] <- "TRI"
+
+ggplot2::ggplot() +
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "",
+                x = "", 
+                y = "") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "right", 
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p1
+
+points_on_island <- environmental_dataset_full |>
+  sf::st_as_sf() |>
+  sf::st_set_crs(4326) |>  # Use correct CRS for your points
+  sf::st_filter(
+    shape_file |>
+      dplyr::filter(island == "La Palma") |>
+      sf::st_set_crs(4326),  # Ensure CRS is set for shape
+    .predicate = sf::st_within) |>
+  dplyr::left_join(growth_form_list_extended, by = "species") |>
+  dplyr::filter(!is.na(growth_form),
+                species %in% environmental_data_aggregate_500_13_extended$species) |>
+  dplyr::mutate(x = sf::st_coordinates(geometry)[, 1],
+                y = sf::st_coordinates(geometry)[, 2])
+
+# 1. Make grid over the island
+grid <- island_shape |>
+  sf::st_make_grid(cellsize = 300, square = TRUE) |>
+  sf::st_as_sf() |>
+  sf::st_filter(island_shape, .predicate = sf::st_intersects) |>
+  dplyr::mutate(cell_id = dplyr::row_number()) |>
+  sf::st_transform(terra::crs(points_on_island))
+
+# 2. Join points to grid
+points_with_cell <- points_on_island |>
+  sf::st_join(grid, join = sf::st_intersects)
+
+growth_forms <- points_with_cell |>
+  dplyr::distinct(growth_form) |>
+  dplyr::filter(!is.na(growth_form))
+
+cell_growth_combos <- tidyr::expand_grid(
+  cell_id = grid$cell_id,
+  growth_form = growth_forms$growth_form
+)
+
+cell_summary_all <- points_with_cell |>
+  dplyr::filter(!is.na(cell_id), !is.na(growth_form)) |>
+  dplyr::group_by(cell_id, growth_form) |>
+  dplyr::summarise(
+    total = dplyr::n(),
+    .groups = "drop"
+  )
+
+cell_summary_filled <- cell_growth_combos |>
+  dplyr::left_join(cell_summary_all, by = c("cell_id", "growth_form")) |>
+  dplyr::mutate(total = tidyr::replace_na(total, 0))
+
+cell_summary_filled <- cell_summary_filled |>
+  dplyr::group_by(cell_id) |>
+  dplyr::mutate(
+    total_in_cell = sum(total),
+    proportion = dplyr::if_else(total_in_cell == 0, 0, total / total_in_cell)
+  ) |>
+  dplyr::ungroup()
+
+full_cell_summary_all <- grid |>
+  dplyr::left_join(cell_summary_filled, by = "cell_id")
+
+# Annual herbaceous proportion to other growth forms:
+full_cell_summary_all |>
+  dplyr::filter(growth_form == "Annual Herbaceous") |>
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    title = "AH",
+    fill = "Proportion"
+  ) +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p2
+
+# Perennial herbaceous proportion to other growth forms:
+full_cell_summary_all |>
+  dplyr::filter(growth_form == "Perennial Herbaceous") |>
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    title = "PH",
+    fill = "Proportion"
+  ) +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p3
+
+# Insular woody proportion to other growth forms:
+full_cell_summary_all |>
+  dplyr::filter(growth_form == "Insular Woodiness") |>
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    title = "IW",
+    fill = "Proportion"
+  ) +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p4
+
+# Derived woody proportion to other growth forms:
+full_cell_summary_all |>
+  dplyr::filter(growth_form == "Derived Woodiness") |>
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    title = "DW",
+    fill = "Proportion"
+  ) +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p5
+
+# Ancestral woody proportion to other growth forms:
+full_cell_summary_all |>
+  dplyr::filter(growth_form == "Ancestral Woodiness") |>
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(
+    title = "AW",
+    fill = "Proportion"
+  ) +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 legend.position = "right",
+                 axis.text.x = ggplot2::element_text(size=5.5)) -> p6
+
+ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, ncol = 3, nrow = 2, labels = c("a.", "b.", "c.", "d.", "e.", "f."))
+```
+Plot the density of occurrences on the different islands
+```{r}
+ggplot2::ggplot(points_on_island) +
+  ggplot2::stat_density_2d(ggplot2::aes(x = x, y = y, fill = ..level..), geom = "polygon", alpha = 0.6) +
+  ggplot2::facet_wrap(~ growth_form) +
+  ggplot2::scale_fill_viridis_c(option = "C") +
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "",
+                fill = "Density",
+                x = "",
+                y = "") +
+  ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank(),
+                 axis.text.x = ggplot2::element_blank(),
+                 axis.ticks.x = ggplot2::element_blank(),
+                 axis.text.y = ggplot2::element_blank(),
+                 axis.ticks.y = ggplot2::element_blank())
+```
+
