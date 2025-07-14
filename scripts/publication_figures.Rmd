@@ -157,7 +157,7 @@ arrow_dataframe <- merge(
 #                       'Convolvulus floridus' = "darkblue",
 #                       'Bosea yervamora' = "darkblue")
 
-highlight_species <- read.csv("Updated_Figure_2b_species_habitat_delineation.csv", stringsAsFactors = F, header = T)
+highlight_species <- read.csv("../data/Updated_Figure_2b_species_habitat_delineation.csv", stringsAsFactors = F, header = T)
 colour <- merge(phylo_pca_labelled, highlight_species, by = 'species')
 
 p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
