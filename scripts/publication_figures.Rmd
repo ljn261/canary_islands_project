@@ -79,7 +79,7 @@ loadings <- as.data.frame(phylo_pca$rotation[, 1:2])  # First two PCs
 loadings$Variable <- rownames(loadings)  # Variable names
 loadings <- transform(loadings, PC1 = PC1 * 5, PC2 = PC2 * 5)
 
-ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
+p1 <- ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
   ggplot2::geom_point(size = 3, alpha = 0.8) +
   # Add ellipse:
   ggplot2::stat_ellipse(ggplot2::aes(fill = growth_form), alpha = 0.2, geom = "polygon") +
@@ -92,7 +92,7 @@ ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color = growt
                            size = 5, color = "black", bg.color = 'white') +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
-                title = "PCA of Climatic Variables",
+                #title = "PCA of Climatic Variables",
                 color = 'Growth form',
                 fill = 'Growth form') +
   ggplot2::scale_color_manual(values = c(
@@ -116,9 +116,9 @@ ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color = growt
 ```
 Plotting contribution of loadings:
 ```{r}
-factoextra::fviz_cos2(phylo_pca_100_25, choice = "var", axes = 1) +
+factoextra::fviz_cos2(phylo_pca, choice = "var", axes = 1) +
   ggplot2::labs(title = "First PC", y = "")-> p1
-factoextra::fviz_cos2(phylo_pca_100_25, choice = "var", axes = 2) +
+factoextra::fviz_cos2(phylo_pca, choice = "var", axes = 2) +
   ggplot2::labs(title = "Second PC", y = "")-> p2
 ```
 PCA plot with selection of species highlighted:
@@ -142,22 +142,25 @@ image_dataframe <- data.frame(
 
 arrow_dataframe <- merge(
   image_dataframe,
-  phylo_pca_500_13_labelled[, c("species", "PC1", "PC2")],
+  phylo_pca_labelled[, c("species", "PC1", "PC2")],
   by = "species"
 )
 
-highlight_species <- c('Mespilodaphne foetens' = "darkgreen", 
-                       'Echium wildpretii' = "red", 
-                       'Laurus novocanariensis' = "darkgreen", 
-                       'Convolvulus floridus' = "darkblue",
-                       'Tamarix canariensis' = "orange",
-                       'Euphorbia handiensis' = "orange",
-                       'Viola cheiranthifolia' = "red",
-                       'Cistus symphytifolius' = "purple",
-                       'Adenocarpus foliolosus' = "purple",
-                       'Bosea yervamora' = "darkblue")
+#highlight_species <- c('Mespilodaphne foetens' = "darkgreen",
+#                       'Laurus novocanariensis' = "darkgreen", 
+#                       'Cistus symphytifolius' = "purple",
+#                       'Adenocarpus foliolosus' = "purple",
+#                       'Echium wildpretii' = "red", 
+#                       'Viola cheiranthifolia' = "red",
+#                       'Tamarix canariensis' = "orange",
+#                       'Euphorbia handiensis' = "orange",
+#                       'Convolvulus floridus' = "darkblue",
+#                       'Bosea yervamora' = "darkblue")
 
-ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2)) +
+highlight_species <- read.csv("Updated_Figure_2b_species_habitat_delineation.csv", stringsAsFactors = F, header = T)
+colour <- merge(phylo_pca_labelled, highlight_species, by = 'species')
+
+p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
   # Segments
   ggplot2::geom_segment(
     data = arrow_dataframe,
@@ -168,14 +171,21 @@ ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2)) +
   ) +
   # Grey background points:
   ggplot2::geom_point(
-    data = subset(phylo_pca_labelled, !(species %in% names(highlight_species))),
+    data = subset(phylo_pca_labelled, !(species %in% highlight_species$species)),
     color = "grey80", alpha = 0.4) +
   # Colored highlight points
   ggplot2::geom_point(
-    data = subset(phylo_pca_labelled, species %in% names(highlight_species)),
+    data = subset(phylo_pca_labelled, species %in% highlight_species$species),
     ggplot2::aes(color = species), size = 3
   ) +
-  ggplot2::scale_color_manual(values = highlight_species) +
+  # ggrepel::geom_text_repel(
+  #  data = subset(phylo_pca_labelled, species %in% highlight_species$species),
+  #  ggplot2::aes(label = species, color = species), 
+  #  size = 2,
+  #  max.overlaps = Inf,
+  #  force = 2
+  #) +
+  ggplot2::scale_color_manual(values = as.vector(colour$colour)) +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "",
@@ -188,11 +198,11 @@ ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2)) +
   ggimage::geom_image(data = image_dataframe,
                       ggplot2::aes(x = x, y = y, image = image, size = size)) +
   ggplot2::scale_size_identity() +
-  ggplot2::geom_text(x = -3, y = 4.7, label = "Coastal \n specialists", color = "orange", fontface = "bold") +
-  ggplot2::geom_text(x = -2.5, y = -3.5, label = "High mountain \n specialists", color = "red", fontface = "bold") +
-  ggplot2::geom_text(x = 1, y = 1.8, label = "Thermo-sclerophilous \n specialists", color = "darkblue", fontface = "bold") +
-  ggplot2::geom_text(x = 2.8, y = 0.5, label = "Laurisilva specialists", color = "darkgreen", fontface = "bold") +
-  ggplot2::geom_text(x = 0.5, y = -3, label = "Pinewood specialists", color = "purple", fontface = "bold")
+  ggplot2::geom_text(x = -3.6, y = 2.7, label = "Coastal \n specialists", color = "orange") +
+  ggplot2::geom_text(x = -2.5, y = -4.1, label = "High mountain \n specialists", color = "red") +
+  ggplot2::geom_text(x = 1, y = 2.3, label = "Thermo-sclerophilous \n specialists", color = "darkblue") +
+  ggplot2::geom_text(x = 2.2, y = -1.7, label = "Laurisilva specialists", color = "darkgreen") +
+  ggplot2::geom_text(x = 0.5, y = -3, label = "Pinewood specialists", color = "purple")
 ```
 
 PCA plot of herbaceous versus woody niche:
@@ -204,7 +214,7 @@ phylo_pca_labelled_grouped <- as.data.frame(phylo_pca$x) |>
     stringr::str_detect(growth_form, "Herbaceous") ~ "Herbaceous",
     stringr::str_detect(growth_form, "Woodiness") ~ "Woodiness"))
 
-ggplot2::ggplot(phylo_pca_labelled_grouped, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
+p3 <- ggplot2::ggplot(phylo_pca_labelled_grouped, ggplot2::aes(x = PC1, y = PC2, color = growth_form)) +
   ggplot2::geom_point(size = 3, alpha = 0.8) +
   # Add ellipse:
   ggplot2::stat_ellipse(ggplot2::aes(fill = growth_form), alpha = 0.2, geom = "polygon") +
@@ -221,14 +231,14 @@ ggplot2::ggplot(phylo_pca_labelled_grouped, ggplot2::aes(x = PC1, y = PC2, color
 PCA plot, highlighting growth forms separately
 ```{r}
 # ANNUAL HERBACEOUS
-phylo_pca_labelled |>
+p4 <- phylo_pca_labelled |>
   dplyr::filter(growth_form == 'Annual Herbaceous')|>
   dplyr::as_tibble() |>
   ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#ABA300") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#ABA300") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "AH",
@@ -240,14 +250,14 @@ phylo_pca_labelled |>
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
 
 # PERENNIAL HERBACEOUS
-phylo_pca_labelled |>
+p5 <- phylo_pca_labelled |>
   dplyr::filter(growth_form == 'Perennial Herbaceous')|>
   dplyr::as_tibble() |>
   ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#ED68ED") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#ED68ED") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "PH",
@@ -259,14 +269,14 @@ phylo_pca_labelled |>
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
 
 # INSULAR WOODINESS
-phylo_pca_labelled |>
+p6 <- phylo_pca_labelled |>
   dplyr::filter(growth_form == 'Insular Woodiness')|>
   dplyr::as_tibble() |>
   ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#00A9FF") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00A9FF") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "IW",
@@ -278,14 +288,14 @@ phylo_pca_labelled |>
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
 
 # DERIVED WOODINESS
-phylo_pca_labelled |>
+p7 <- phylo_pca_labelled |>
   dplyr::filter(growth_form == 'Derived Woodiness')|>
   dplyr::as_tibble() |>
   ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#00BE67") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00BE67") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "DW",
@@ -297,14 +307,14 @@ phylo_pca_labelled |>
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
 
 # ANCESTRAL WOODINESS
-phylo_pca_labelled |>
+p8 <- phylo_pca_labelled |>
   dplyr::filter(growth_form == 'Ancestral Woodiness')|>
   dplyr::as_tibble() |>
   ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2)) +
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 3, alpha = 0.8, colour = "#F8766D") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#F8766D") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "AW",
@@ -314,6 +324,19 @@ phylo_pca_labelled |>
   ggplot2::ylim(-5.5, 6.5) +
   ggplot2::theme_minimal() +
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
+
+p1 <- p1 + theme(legend.position.inside = c(0.85, 0.85))
+p2 <- p2 + labs(x = "", y = "")
+p3 <- p3 + labs(x = "", y = "")
+p3 <- p3 + theme(legend.position = c(0.85, 0.85))
+p4 <- p4 + labs(x = "", y = "")
+p5 <- p5 + labs(x = "", y = "")
+p6 <- p6 + labs(x = "", y = "")
+p7 <- p7 + labs(x = "", y = "")
+p8 <- p8 + labs(x = "", y = "")
+composite_plot <- p1 / (p2 | p3) / (p4 | p5 | p6 | p7 | p8) +
+  plot_layout(heights = c(2, 1.5, 0.75))
+composite_plot
 ```
 
 ## Phylogenetic ANOVA results:
