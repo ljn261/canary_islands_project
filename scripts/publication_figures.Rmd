@@ -18,7 +18,7 @@ environmental_dataset_full <- readr::read_csv("../data/output_data/environmental
   dplyr::mutate( # Extra code needed to convert character column to geometry object
     geometry = purrr::map(
       geometry,
-      ~ as.numeric(stringr::str_extract_all(.x, "\\d+(\\.\\d+)?")[[1]])
+      ~ as.numeric(stringr::str_extract_all(.x, "-?\\d+(\\.\\d+)?")[[1]])
     )
   ) |>
   dplyr::mutate(
@@ -687,7 +687,7 @@ points_on_island <- environmental_dataset_full |>
 
 # 1. Make grid over the island
 grid <- island_shape |>
-  sf::st_make_grid(cellsize = 300, square = TRUE) |>
+  sf::st_make_grid(cellsize = 0.001, square = TRUE) |>
   sf::st_as_sf() |>
   sf::st_filter(island_shape, .predicate = sf::st_intersects) |>
   dplyr::mutate(cell_id = dplyr::row_number()) |>
