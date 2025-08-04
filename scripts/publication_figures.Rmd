@@ -7,14 +7,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source('../scripts/00_aux_functions.R')
+source('00_aux_functions.R')
 ```
 
 # Publication Figures
 This script needs the following variables to run:
 ```{r}
 environmental_dataset <- readr::read_csv("../data/output_data/environmental_dataset_balanced_aggregate.csv")
-environmental_dataset_full <- readr::read_csv("../data/output_data/environmental_dataset_balanced_full.csv") |>
+environmental_dataset_full <- readr::read_csv("environmental_dataset_balanced_full.csv") |>
   dplyr::mutate( # Extra code needed to convert character column to geometry object
     geometry = purrr::map(
       geometry,
@@ -22,9 +22,10 @@ environmental_dataset_full <- readr::read_csv("../data/output_data/environmental
     )
   ) |>
   dplyr::mutate(
-    geometry = purrr::map(geometry, ~ sf::st_point(.x))
+    geometry = purrr::map(geometry, sf::st_point)
   ) |>
   sf::st_as_sf(sf_column_name = "geometry", crs = 4326)
+
 ```
 
 ## Correlation analysis:
@@ -97,17 +98,26 @@ p1 <- ggplot2::ggplot(phylo_pca_labelled, ggplot2::aes(x = PC1, y = PC2, color =
                 fill = 'Growth form') +
   ggplot2::scale_color_manual(values = c(
     "Annual Herbaceous" = "#ABA300",
-    "Perennial Herbaceous" = "#ED68ED",
-    "Insular Woodiness" = "#00A9FF",
-    "Derived Woodiness" =  "#00BE67",
-    "Ancestral Woodiness" = "#F8766D"
-  )) +
+    "Perennial Herbaceous" = "#F8766D",
+    "Insular Woodiness" = "#00BE67",
+    "Derived Woodiness" =  "#00A9FF",
+    "Ancestral Woodiness" = "#ED68ED"
+  ), breaks = c("Annual Herbaceous",
+    "Perennial Herbaceous",
+    "Insular Woodiness",
+    "Derived Woodiness",
+    "Ancestral Woodiness")) +
   ggplot2::scale_fill_manual(values = c(
     "Annual Herbaceous" = "#ABA300",
-    "Perennial Herbaceous" = "#ED68ED",
-    "Insular Woodiness" = "#00A9FF",
-    "Derived Woodiness" =  "#00BE67",
-    "Ancestral Woodiness" = "#F8766D"
+    "Perennial Herbaceous" = "#F8766D",
+    "Insular Woodiness" = "#00BE67",
+    "Derived Woodiness" =  "#00A9FF",
+    "Ancestral Woodiness" = "#ED68ED"
+  ), breaks = c("Annual Herbaceous",
+    "Perennial Herbaceous",
+    "Insular Woodiness",
+    "Derived Woodiness",
+    "Ancestral Woodiness"
   )) +
   ggplot2::xlim(-6, 6) +
   ggplot2::ylim(-5.5, 6.5) +
@@ -124,20 +134,20 @@ factoextra::fviz_cos2(phylo_pca, choice = "var", axes = 2) +
 PCA plot with selection of species highlighted:
 ```{r}
 image_dataframe <- data.frame(
-  species = c('Mespilodaphne foetens', 'Echium wildpretii', 'Laurus novocanariensis', 'Convolvulus floridus', 'Tamarix canariensis', 'Euphorbia handiensis', 'Viola cheiranthifolia', 'Cistus symphytifolius', 'Adenocarpus foliolosus', 'Bosea yervamora'),
-  x = c(5.5, -5.2, 4.2, 1,-1, -5, -4, -1, 2, 3),     # manually set X positions
-  y = c(1, -1.5, -3, 4.5, 5, 3.5, -4.5, -4.5, -4, 3.5),       # manually set Y positions
-  image = c("../data/plant_images/mespilodaphne_foetens.png",
-            "../data/plant_images/echium_wildpretii.png",
-            "../data/plant_images/laurus_novocanariensis.png",
-            "../data/plant_images/convolvulus floridus.png",
-            "../data/plant_images/tamarix_canariensis.png",
-            "../data/plant_images/euphorbia_handiensis.png",
-            "../data/plant_images/viola_cheiranthifolia.png",
-            "../data/plant_images/cistus_symphytifolius.png",
-            "../data/plant_images/adenocarpus_foliolosus.png",
-            "../data/plant_images/bosea_yervamora.png"),
-  size = c(0.35, 0.25, 0.25, 0.25, 0.2, 0.3, 0.3, 0.2, 0.3, 0.2)
+  species = c('Mespilodaphne foetens', 'Echium wildpretii', 'Laurus novocanariensis', 'Convolvulus floridus', 'Tamarix canariensis', 'Euphorbia handiensis', 'Viola cheiranthifolia', 'Cistus symphytifolius', 'Adenocarpus foliolosus', 'Chrysojasminum odoratissimum'),
+  x = c(5.5, -5.6, 4.2, 1,-1, -5, -4, -1, 2, 3),     # manually set X positions
+  y = c(1.5, -1.5, -3, 4.5, 5, 5.7, -4.5, -4.5, -4, 3.5),       # manually set Y positions
+  image = c("plant_images/mespilodaphne_foetens.png",
+            "plant_images/echium_wildpretii.png",
+            "plant_images/laurus_novocanariensis.png",
+            "plant_images/convolvulus floridus.png",
+            "plant_images/tamarix_canariensis.png",
+            "plant_images/euphorbia_handiensis.png",
+            "plant_images/viola_cheiranthifolia.png",
+            "plant_images/cistus_symphytifolius.png",
+            "plant_images/adenocarpus_foliolosus.png",
+            "plant_images/Chrysojasminum_odoratissimum.png"),
+  size = c(0.35, 0.25, 0.25, 0.25, 0.2, 0.25, 0.3, 0.2, 0.3, 0.2)
 )
 
 arrow_dataframe <- merge(
@@ -155,12 +165,12 @@ arrow_dataframe <- merge(
 #                       'Tamarix canariensis' = "orange",
 #                       'Euphorbia handiensis' = "orange",
 #                       'Convolvulus floridus' = "darkblue",
-#                       'Bosea yervamora' = "darkblue")
+#                       'Chrysojasminum odoratissimum' = "darkblue")
 
-highlight_species <- read.csv("../data/Updated_Figure_2b_species_habitat_delineation.csv", stringsAsFactors = F, header = T)
+highlight_species <- read.csv("Updated_Figure_2b_species_habitat_delineation.csv", stringsAsFactors = F, header = T)
 colour <- merge(phylo_pca_labelled, highlight_species, by = 'species')
 
-p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
+p2 <- ggplot2::ggplot(colour, ggplot2::aes(x = PC1, y = PC2)) +
   # Segments
   ggplot2::geom_segment(
     data = arrow_dataframe,
@@ -178,12 +188,13 @@ p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
     data = subset(phylo_pca_labelled, species %in% highlight_species$species),
     ggplot2::aes(color = species), size = 3
   ) +
-  # ggrepel::geom_text_repel(
+  #ggrepel::geom_text_repel(
   #  data = subset(phylo_pca_labelled, species %in% highlight_species$species),
   #  ggplot2::aes(label = species, color = species), 
   #  size = 2,
   #  max.overlaps = Inf,
-  #  force = 2
+  #  force = 2,
+  #  fontface = "italic"
   #) +
   ggplot2::scale_color_manual(values = as.vector(colour$colour)) +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
@@ -194,15 +205,17 @@ p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
   ggplot2::xlim(-6, 6) +
   ggplot2::ylim(-5.5, 6.5) +
   ggplot2::theme_minimal() +
-  ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "none") +
+  ggplot2::theme(text = ggplot2::element_text(size = 14),
+                 legend.position = "none") +
   ggimage::geom_image(data = image_dataframe,
                       ggplot2::aes(x = x, y = y, image = image, size = size)) +
   ggplot2::scale_size_identity() +
-  ggplot2::geom_text(x = -3.6, y = 2.7, label = "Coastal \n specialists", color = "orange") +
-  ggplot2::geom_text(x = -2.5, y = -4.1, label = "High mountain \n specialists", color = "red") +
-  ggplot2::geom_text(x = 1, y = 2.3, label = "Thermo-sclerophilous \n specialists", color = "darkblue") +
-  ggplot2::geom_text(x = 2.2, y = -1.7, label = "Laurisilva specialists", color = "darkgreen") +
-  ggplot2::geom_text(x = 0.5, y = -3, label = "Pinewood specialists", color = "purple")
+  ggplot2::geom_text(x = -4, y = 2.7, label = "Coastal \n specialists", color = "#f98e09") +
+  ggplot2::geom_text(x = -2.5, y = -4.1, label = "High mountain \n specialists", color = "#5f5a00") +
+  ggplot2::geom_text(x = 1, y = 2.3, label = "Thermo-sclerophilous \n specialists", color = "#bc3754") +
+  ggplot2::geom_text(x = 2.2, y = -2.3, label = "Laurisilva specialists", color = "darkgreen") +
+  ggplot2::geom_text(x = 0.5, y = -3, label = "Pinewood specialists", color = "#0d0887")
+
 ```
 
 PCA plot of herbaceous versus woody niche:
@@ -257,7 +270,7 @@ p5 <- phylo_pca_labelled |>
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#ED68ED") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#F8766D") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "PH",
@@ -276,7 +289,7 @@ p6 <- phylo_pca_labelled |>
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00A9FF") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00BE67") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "IW",
@@ -295,7 +308,7 @@ p7 <- phylo_pca_labelled |>
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00BE67") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#00A9FF") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "DW",
@@ -314,7 +327,7 @@ p8 <- phylo_pca_labelled |>
   # Add contour:
   ggplot2::stat_density2d(colour = "grey") +
   # Add points:
-  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#F8766D") +
+  ggplot2::geom_point(size = 2, alpha = 0.8, colour = "#ED68ED") +
   ggplot2::labs(x = paste0("PC1 (", round(100 * summary(phylo_pca)$importance[2, 1], 1), "%)"),
                 y = paste0("PC2 (", round(100 * summary(phylo_pca)$importance[2, 2], 1), "%)"),
                 title = "AW",
@@ -325,17 +338,17 @@ p8 <- phylo_pca_labelled |>
   ggplot2::theme_minimal() +
   ggplot2::theme(text = ggplot2::element_text(size = 14), legend.position = "right")
 
-p1 <- p1 + theme(legend.position.inside = c(0.85, 0.85))
-p2 <- p2 + labs(x = "", y = "")
-p3 <- p3 + labs(x = "", y = "")
-p3 <- p3 + theme(legend.position = c(0.85, 0.85))
-p4 <- p4 + labs(x = "", y = "")
-p5 <- p5 + labs(x = "", y = "")
-p6 <- p6 + labs(x = "", y = "")
-p7 <- p7 + labs(x = "", y = "")
-p8 <- p8 + labs(x = "", y = "")
+p1 <- p1 + ggplot2::theme(legend.position = c(0.85, 0.85))
+p2 <- p2 + ggplot2::labs(x = "", y = "")
+p3 <- p3 + ggplot2::labs(x = "", y = "")
+p3 <- p3 + ggplot2::theme(legend.position = c(0.85, 0.85))
+p4 <- p4 + ggplot2::labs(x = "", y = "")
+p5 <- p5 + ggplot2::labs(x = "", y = "")
+p6 <- p6 + ggplot2::labs(x = "", y = "")
+p7 <- p7 + ggplot2::labs(x = "", y = "")
+p8 <- p8 + ggplot2::labs(x = "", y = "")
 composite_plot <- p1 / (p2 | p3) / (p4 | p5 | p6 | p7 | p8) +
-  plot_layout(heights = c(2, 1.5, 0.75))
+  patchwork::plot_layout(heights = c(2.1, 1.5, 0.55))
 composite_plot
 ```
 
@@ -646,8 +659,24 @@ ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, ncol = 3, nrow = 3,
 ```
 ## 4. Plot of TRI, highlighting IW:
 ```{r}
+shape_file <- sf::read_sf("gadm_land_3.shp")
+COORD_REF_SYSTEM = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+DEM_rast <- raster::raster("canaryclim_dem.tif")
+DEM_rast <- raster::projectRaster(DEM_rast, crs = COORD_REF_SYSTEM)
+DEM_rast <- terra::rast(DEM_rast)
+growth_form_list_extended <- read.csv('growth_form_list_extended.csv') 
+
+# Calculate Terrain Ruggedness Index (TRI) raster from DEM
+TRI_rast <- spatialEco::tri(DEM_rast)
+
+# Convert DEM and TRI_rast to RasterLayer
+DEM_rast <- raster::raster(DEM_rast)
+TRI_rast <- raster::raster(TRI_rast)
+
+island_of_interest <- c("La Palma")
+
 island_shape <- shape_file |>
-  dplyr::filter(island == "La Palma") |>
+  dplyr::filter(island == island_of_interest) |>
   sf::st_set_crs(4326) |>
   sf::st_transform(crs = terra::crs(TRI_rast)) 
 
@@ -665,33 +694,29 @@ ggplot2::ggplot() +
   ggplot2::labs(title = "",
                 x = "", 
                 y = "") +
-  ggplot2::theme_minimal() +
+  ggplot2::theme_void() +
   ggplot2::theme(legend.position = "right", 
                  panel.grid.minor = ggplot2::element_blank(),
-                 panel.grid.major = ggplot2::element_blank(),
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p1
+                 panel.grid.major = ggplot2::element_blank()) -> p1
 
 points_on_island <- environmental_dataset_full |>
   sf::st_as_sf() |>
   sf::st_set_crs(4326) |>  # Use correct CRS for your points
   sf::st_filter(
     shape_file |>
-      dplyr::filter(island == "La Palma") |>
-      sf::st_set_crs(4326),  # Ensure CRS is set for shape
-    .predicate = sf::st_within) |>
+      dplyr::filter(island == island_of_interest) |>
+      sf::st_set_crs(4326)) |>
   dplyr::left_join(growth_form_list_extended, by = "species") |>
-  dplyr::filter(!is.na(growth_form),
-                species %in% environmental_data_aggregate_500_13_extended$species) |>
+  dplyr::filter(!is.na(growth_form)) |>
   dplyr::mutate(x = sf::st_coordinates(geometry)[, 1],
                 y = sf::st_coordinates(geometry)[, 2])
 
 # 1. Make grid over the island
 grid <- island_shape |>
-  sf::st_make_grid(cellsize = 0.001, square = TRUE) |>
+  sf::st_make_grid(cellsize = 0.003, square = TRUE) |> # 0.001 corresponds to ~100m at the equator
   sf::st_as_sf() |>
-  sf::st_filter(island_shape, .predicate = sf::st_intersects) |>
-  dplyr::mutate(cell_id = dplyr::row_number()) |>
-  sf::st_transform(terra::crs(points_on_island))
+  sf::st_filter(island_shape) |>
+  dplyr::mutate(cell_id = dplyr::row_number())
 
 # 2. Join points to grid
 points_with_cell <- points_on_island |>
@@ -729,22 +754,162 @@ cell_summary_filled <- cell_summary_filled |>
 full_cell_summary_all <- grid |>
   dplyr::left_join(cell_summary_filled, by = "cell_id")
 
+############################################################################### Testing:
+library(ggnewscale)
+
+p2 <- ggplot2::ggplot() +
+  # Base raster layer
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  
+  # Reset fill scale for the next layer
+  ggnewscale::new_scale_fill() +
+  
+  # Overlay sf data with different fill scale, filtering out proportions < 0.25
+  ggplot2::geom_sf(data = full_cell_summary_all |> 
+                     dplyr::filter(growth_form == "Annual Herbaceous", 
+                                   proportion > 0), 
+                   ggplot2::aes(fill = proportion), color = NA, alpha = 0.7) +
+  ggplot2::scale_fill_viridis_c(name = "Proportion", option = "F", na.value = "transparent", direction = -1) +
+  
+  # Island boundary
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Annual Herbaceous",
+                x = "", 
+                y = "") +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = "none", 
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank())
+
+
+p3 <- ggplot2::ggplot() +
+  # Base raster layer
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  
+  # Reset fill scale for the next layer
+  ggnewscale::new_scale_fill() +
+  
+  # Overlay sf data with different fill scale, filtering out proportions < 0.25
+  ggplot2::geom_sf(data = full_cell_summary_all |> 
+                     dplyr::filter(growth_form == "Perennial Herbaceous", 
+                                   proportion > 0), 
+                   ggplot2::aes(fill = proportion), color = NA, alpha = 0.7) +
+  ggplot2::scale_fill_viridis_c(name = "Proportion", option = "F", na.value = "transparent") +
+  
+  # Island boundary
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Perennial Herbaceous",
+                x = "", 
+                y = "") +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = "none", 
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank())
+
+p4 <- ggplot2::ggplot() +
+  # Base raster layer
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  
+  # Reset fill scale for the next layer
+  ggnewscale::new_scale_fill() +
+  
+  # Overlay sf data with different fill scale, filtering out proportions < 0.25
+  ggplot2::geom_sf(data = full_cell_summary_all |> 
+                     dplyr::filter(growth_form == "Insular Woodiness", 
+                                   proportion > 0), 
+                   ggplot2::aes(fill = proportion), color = NA, alpha = 0.7) +
+  ggplot2::scale_fill_viridis_c(name = "Proportion", option = "F", na.value = "transparent") +
+  
+  # Island boundary
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Insular Woodiness",
+                x = "", 
+                y = "") +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = "none", 
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank())
+
+p5 <- ggplot2::ggplot() +
+  # Base raster layer
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  
+  # Reset fill scale for the next layer
+  ggnewscale::new_scale_fill() +
+  
+  # Overlay sf data with different fill scale, filtering out proportions < 0.25
+  ggplot2::geom_sf(data = full_cell_summary_all |> 
+                     dplyr::filter(growth_form == "Derived Woodiness", 
+                                   proportion > 0), 
+                   ggplot2::aes(fill = proportion), color = NA, alpha = 0.7) +
+  ggplot2::scale_fill_viridis_c(name = "Proportion", option = "F", na.value = "transparent") +
+  
+  # Island boundary
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Derived Woodiness",
+                x = "", 
+                y = "") +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = "none", 
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank())
+
+p6 <- ggplot2::ggplot() +
+  # Base raster layer
+  ggplot2::geom_raster(data = tri_df, ggplot2::aes(x = x, y = y, fill = TRI)) +
+  ggplot2::scale_fill_viridis_c(name = "TRI", option = "C", na.value = "white") +
+  
+  # Reset fill scale for the next layer
+  ggnewscale::new_scale_fill() +
+  
+  # Overlay sf data with different fill scale, filtering out proportions < 0.25
+  ggplot2::geom_sf(data = full_cell_summary_all |> 
+                     dplyr::filter(growth_form == "Ancestral Woodiness", 
+                                   proportion > 0), 
+                   ggplot2::aes(fill = proportion), color = NA, alpha = 0.7) +
+  ggplot2::scale_fill_viridis_c(name = "Proportion", option = "F", na.value = "transparent") +
+  
+  # Island boundary
+  ggplot2::geom_sf(data = island_shape, fill = NA, color = "black", linewidth = 0.5) +
+  
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Ancestral Woodiness",
+                x = "", 
+                y = "") +
+  ggplot2::theme_void() +
+  ggplot2::theme(legend.position = c(1,1.18),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 panel.grid.major = ggplot2::element_blank())
+############################################################################################################################################
+
 # Annual herbaceous proportion to other growth forms:
 full_cell_summary_all |>
   dplyr::filter(growth_form == "Annual Herbaceous") |>
   ggplot2::ggplot() +
   ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
   ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
-  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
-  ggplot2::theme_minimal() +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90", direction = -1) +
+  ggplot2::theme_void() +
   ggplot2::labs(
     title = "AH",
     fill = "Proportion"
   ) +
   ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                  panel.grid.major = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p2
+                 legend.position = "none") -> p2
+
 
 # Perennial herbaceous proportion to other growth forms:
 full_cell_summary_all |>
@@ -752,16 +917,15 @@ full_cell_summary_all |>
   ggplot2::ggplot() +
   ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
   ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
-  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
-  ggplot2::theme_minimal() +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90", direction = -1) +
+  ggplot2::theme_void() +
   ggplot2::labs(
     title = "PH",
     fill = "Proportion"
   ) +
   ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                  panel.grid.major = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p3
+                 legend.position = "none") -> p3
 
 # Insular woody proportion to other growth forms:
 full_cell_summary_all |>
@@ -769,16 +933,15 @@ full_cell_summary_all |>
   ggplot2::ggplot() +
   ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
   ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
-  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
-  ggplot2::theme_minimal() +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90", direction = -1) +
+  ggplot2::theme_void() +
   ggplot2::labs(
     title = "IW",
     fill = "Proportion"
   ) +
   ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                  panel.grid.major = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p4
+                 legend.position = "none") -> p4
 
 # Derived woody proportion to other growth forms:
 full_cell_summary_all |>
@@ -786,16 +949,15 @@ full_cell_summary_all |>
   ggplot2::ggplot() +
   ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
   ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
-  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
-  ggplot2::theme_minimal() +
+  ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90", direction = -1) +
+  ggplot2::theme_void() +
   ggplot2::labs(
     title = "DW",
     fill = "Proportion"
   ) +
   ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                  panel.grid.major = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p5
+                 legend.position = "none") -> p5
 
 # Ancestral woody proportion to other growth forms:
 full_cell_summary_all |>
@@ -804,15 +966,14 @@ full_cell_summary_all |>
   ggplot2::geom_sf(ggplot2::aes(fill = proportion), color = NA) +
   ggplot2::geom_sf(data = island_shape, fill = NA, color = "black") +
   ggplot2::scale_fill_viridis_c(option = "F", na.value = "gray90") +
-  ggplot2::theme_minimal() +
+  ggplot2::theme_void() +
   ggplot2::labs(
     title = "AW",
     fill = "Proportion"
   ) +
   ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                  panel.grid.major = ggplot2::element_blank(),
-                 legend.position = "right",
-                 axis.text.x = ggplot2::element_text(size=5.5)) -> p6
+                 legend.position = c(1,1.18)) -> p6
 
 ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, ncol = 3, nrow = 2, labels = c("a.", "b.", "c.", "d.", "e.", "f."))
 ```
