@@ -1,44 +1,44 @@
 species,habitat,colour
-Argyranthemum frutescens,Coastal \n specialists,orange
-Astydamia latifolia,Coastal \n specialists,orange
-Bassia tomentosa,Coastal \n specialists,orange
-Cakile maritima,Coastal \n specialists,orange
-Euphorbia aphylla,Coastal \n specialists,orange
-Euphorbia canariensis,Coastal \n specialists,orange
-Euphorbia handiensis,Coastal \n specialists,orange
-Euphorbia paralias,Coastal \n specialists,orange
-Gymnocarpos decander,Coastal \n specialists,orange
-Limonium papillatum,Coastal \n specialists,orange
-Limonium pectinatum,Coastal \n specialists,orange
-Lotus lancerottensis,Coastal \n specialists,orange
-Lycium intricatum,Coastal \n specialists,orange
-Ononis natrix,Coastal \n specialists,orange
-Polycarpaea nivea,Coastal \n specialists,orange
-Reseda scoparia,Coastal \n specialists,orange
-Salicornia perennis,Coastal \n specialists,orange
-Schizogyne glaberrima,Coastal \n specialists,orange
-Schizogyne sericea,Coastal \n specialists,orange
-Suaeda ifniensis,Coastal \n specialists,orange
-Suaeda maritima,Coastal \n specialists,orange
-Suaeda vera,Coastal \n specialists,orange
-Tamarix canariensis,Coastal \n specialists,orange
-Tetraena fontanesii,Coastal \n specialists,orange
-Traganum moquinii,Coastal \n specialists,orange
-Adenocarpus viscosus,High mountain \n specialists,red
-Argyranthemum tenerifae,High mountain \n specialists,red
-Cytisus supranubius,High mountain \n specialists,red
-Echium auberianum,High mountain \n specialists,red
-Echium perezii,High mountain \n specialists,red
-Echium thyrsiflorum,High mountain \n specialists,red
-Echium wildpretii,High mountain \n specialists,red
-Erysimum scoparium,High mountain \n specialists,red
-Nepeta teydea,High mountain \n specialists,red
-Pterocephalus lasiospermus,High mountain \n specialists,red
-Pterocephalus porphyranthus,High mountain \n specialists,red
-Sideritis eriocephala,High mountain \n specialists,red
-Tolpis webbii,High mountain \n specialists,red
-Viola cheiranthifolia,High mountain \n specialists,red
-Viola palmensis,High mountain \n specialists,red
+Argyranthemum frutescens,Coastal \n specialists,#f98e09
+Astydamia latifolia,Coastal \n specialists,#f98e09
+Bassia tomentosa,Coastal \n specialists,#f98e09
+Cakile maritima,Coastal \n specialists,#f98e09
+Euphorbia aphylla,Coastal \n specialists,#f98e09
+Euphorbia canariensis,Coastal \n specialists,#f98e09
+Euphorbia handiensis,Coastal \n specialists,#f98e09
+Euphorbia paralias,Coastal \n specialists,#f98e09
+Gymnocarpos decander,Coastal \n specialists,#f98e09
+Limonium papillatum,Coastal \n specialists,#f98e09
+Limonium pectinatum,Coastal \n specialists,#f98e09
+Lotus lancerottensis,Coastal \n specialists,#f98e09
+Lycium intricatum,Coastal \n specialists,#f98e09
+Ononis natrix,Coastal \n specialists,#f98e09
+Polycarpaea nivea,Coastal \n specialists,#f98e09
+Reseda scoparia,Coastal \n specialists,#f98e09
+Salicornia perennis,Coastal \n specialists,#f98e09
+Schizogyne glaberrima,Coastal \n specialists,#f98e09
+Schizogyne sericea,Coastal \n specialists,#f98e09
+Suaeda ifniensis,Coastal \n specialists,#f98e09
+Suaeda maritima,Coastal \n specialists,#f98e09
+Suaeda vera,Coastal \n specialists,#f98e09
+Tamarix canariensis,Coastal \n specialists,#f98e09
+Tetraena fontanesii,Coastal \n specialists,#f98e09
+Traganum moquinii,Coastal \n specialists,#f98e09
+Adenocarpus viscosus,High mountain \n specialists,#5f5a00
+Argyranthemum tenerifae,High mountain \n specialists,#5f5a00
+Cytisus supranubius,High mountain \n specialists,#5f5a00
+Echium auberianum,High mountain \n specialists,#5f5a00
+Echium perezii,High mountain \n specialists,#5f5a00
+Echium thyrsiflorum,High mountain \n specialists,#5f5a00
+Echium wildpretii,High mountain \n specialists,#5f5a00
+Erysimum scoparium,High mountain \n specialists,#5f5a00
+Nepeta teydea,High mountain \n specialists,#5f5a00
+Pterocephalus lasiospermus,High mountain \n specialists,#5f5a00
+Pterocephalus porphyranthus,High mountain \n specialists,#5f5a00
+Sideritis eriocephala,High mountain \n specialists,#5f5a00
+Tolpis webbii,High mountain \n specialists,#5f5a00
+Viola cheiranthifolia,High mountain \n specialists,#5f5a00
+Viola palmensis,High mountain \n specialists,#5f5a00
 Apollonias barbujana,Laurisilva specialists,darkgreen
 Arbutus canariensis,Laurisilva specialists,darkgreen
 Argyranthemum broussonetii,Laurisilva specialists,darkgreen
@@ -65,31 +65,31 @@ Sideritis macrostachyos,Laurisilva specialists,darkgreen
 Solanum vespertilio,Laurisilva specialists,darkgreen
 Viburnum rugosum,Laurisilva specialists,darkgreen
 Visnea mocanera,Laurisilva specialists,darkgreen
-Adenocarpus foliolosus,Pinewood specialists,purple
-Argyranthemum adauctum,Pinewood specialists,purple
-Chamaecytisus prolifer,Pinewood specialists,purple
-Cistus monspeliensis,Pinewood specialists,purple
-Cistus symphytifolius,Pinewood specialists,purple
-Echium onosmifolium,Pinewood specialists,purple
-Ferula communis,Pinewood specialists,purple
-Genista microphylla,Pinewood specialists,purple
-Lotus berthelotii,Pinewood specialists,purple
-Lotus spartioides,Pinewood specialists,purple
-Ononis angustissima,Pinewood specialists,purple
-Sideritis dasygnaphala,Pinewood specialists,purple
-Sideritis oroteneriffae,Pinewood specialists,purple
-Bosea yervamora,Thermo-sclerophilous \n specialists,darkblue
-Bryonia verrucosa,Thermo-sclerophilous \n specialists,darkblue
-Chrysojasminum odoratissimum,Thermo-sclerophilous \n specialists,darkblue
-Convolvulus floridus,Thermo-sclerophilous \n specialists,darkblue
-Convolvulus fruticulosus,Thermo-sclerophilous \n specialists,darkblue
-Globularia salicina,Thermo-sclerophilous \n specialists,darkblue
-Gonospermum fruticosum,Thermo-sclerophilous \n specialists,darkblue
-Gymnosporia cassinoides,Thermo-sclerophilous \n specialists,darkblue
-Hypericum canariense,Thermo-sclerophilous \n specialists,darkblue
-Marcetella moquiniana,Thermo-sclerophilous \n specialists,darkblue
-Olea europaea,Thermo-sclerophilous \n specialists,darkblue
-Pistacia atlantica,Thermo-sclerophilous \n specialists,darkblue
-Pistacia lentiscus,Thermo-sclerophilous \n specialists,darkblue
-Rhamnus crenulata,Thermo-sclerophilous \n specialists,darkblue
-Withania aristata,Thermo-sclerophilous \n specialists,darkblue
+Adenocarpus foliolosus,Pinewood specialists,#0d0887
+Argyranthemum adauctum,Pinewood specialists,#0d0887
+Chamaecytisus prolifer,Pinewood specialists,#0d0887
+Cistus monspeliensis,Pinewood specialists,#0d0887
+Cistus symphytifolius,Pinewood specialists,#0d0887
+Echium onosmifolium,Pinewood specialists,#0d0887
+Ferula communis,Pinewood specialists,#0d0887
+Genista microphylla,Pinewood specialists,#0d0887
+Lotus berthelotii,Pinewood specialists,#0d0887
+Lotus spartioides,Pinewood specialists,#0d0887
+Ononis angustissima,Pinewood specialists,#0d0887
+Sideritis dasygnaphala,Pinewood specialists,#0d0887
+Sideritis oroteneriffae,Pinewood specialists,#0d0887
+Bosea yervamora,Thermo-sclerophilous \n specialists,#bc3754
+Bryonia verrucosa,Thermo-sclerophilous \n specialists,#bc3754
+Chrysojasminum odoratissimum,Thermo-sclerophilous \n specialists,#bc3754
+Convolvulus floridus,Thermo-sclerophilous \n specialists,#bc3754
+Convolvulus fruticulosus,Thermo-sclerophilous \n specialists,#bc3754
+Globularia salicina,Thermo-sclerophilous \n specialists,#bc3754
+Gonospermum fruticosum,Thermo-sclerophilous \n specialists,#bc3754
+Gymnosporia cassinoides,Thermo-sclerophilous \n specialists,#bc3754
+Hypericum canariense,Thermo-sclerophilous \n specialists,#bc3754
+Marcetella moquiniana,Thermo-sclerophilous \n specialists,#bc3754
+Olea europaea,Thermo-sclerophilous \n specialists,#bc3754
+Pistacia atlantica,Thermo-sclerophilous \n specialists,#bc3754
+Pistacia lentiscus,Thermo-sclerophilous \n specialists,#bc3754
+Rhamnus crenulata,Thermo-sclerophilous \n specialists,#bc3754
+Withania aristata,Thermo-sclerophilous \n specialists,#bc3754
