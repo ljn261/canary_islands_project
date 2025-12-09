@@ -8,7 +8,7 @@
 source('../scripts/00_aux_functions.R')
 
 # Environmental dataset of balanced sampling approach:
-environmental_dataset <- read.csv("./data/output_data/environmental_dataset_balanced_aggregate.csv")
+environmental_dataset <- read.csv("./data/output_data/environmental_dataset_balanced_aggregate_cloud.csv")
 
 # 1. Correlation analysis----
 # Compute and visualise Kendall's correlation per variable
@@ -29,7 +29,8 @@ environmental_dataset |>
     evaporation,
     transpiration,
     interception,
-    aridity_index) |>
+    aridity_index,
+    cloud_median) |>
   stats::cor(method = 'kendall', use="pairwise.complete.obs") |>
   ggcorrplot::ggcorrplot(lab = TRUE)
 
@@ -52,6 +53,7 @@ environmental_dataset |>
 # - interception, 
 # - TRI, and 
 # - aridity index
+# - median cloud coverage
 
 environmental_dataset |> 
   dplyr::select(
@@ -63,7 +65,8 @@ environmental_dataset |>
     precip_seasonality,
     evaporation,
     interception,
-    aridity_index) |>
+    aridity_index,
+    cloud_median) |>
   stats::cor(method = 'kendall', use="pairwise.complete.obs") |>
   ggcorrplot::ggcorrplot(lab = TRUE)
 
@@ -93,9 +96,10 @@ phylo_pca_plot <- plot_3d_phylo_pca(environmental_data = environmental_dataset,
 phylo_pca_plot
 
 # 4. Run Phylogenetic ANOVA----
+set.seed(1)
 phytools::phylANOVA(tree = phylo_tree_phylomaker$scenario.3, 
                     x = environmental_dataset$growth_form, 
-                    y = environmental_dataset$TRI_median, # Adjust environmental variable
+                    y = environmental_dataset$cloud_median, # Adjust environmental variable
                     nsim = 1000,
                     posthoc = TRUE,
                     p.adj = "holm")

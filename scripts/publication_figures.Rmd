@@ -198,7 +198,7 @@ p2 <- ggplot2::ggplot(test, ggplot2::aes(x = PC1, y = PC2)) +
   ggimage::geom_image(data = image_dataframe,
                       ggplot2::aes(x = x, y = y, image = image, size = size)) +
   ggplot2::scale_size_identity() +
-  ggplot2::geom_text(x = -3.6, y = 2.7, label = "Coastal \n specialists", color = "orange") +
+  ggplot2::geom_text(x = -3.2, y = 2.7, label = "Coastal \n specialists", color = "orange") +
   ggplot2::geom_text(x = -2.5, y = -4.1, label = "High mountain \n specialists", color = "red") +
   ggplot2::geom_text(x = 1, y = 2.3, label = "Thermo-sclerophilous \n specialists", color = "darkblue") +
   ggplot2::geom_text(x = 2.2, y = -1.7, label = "Laurisilva specialists", color = "darkgreen") +
@@ -495,6 +495,23 @@ custom_pvalues_aridity_index_ANOVA <- data.frame(
   method = "Phylo-ANOVA",
   y.position = c(1, 16, 1, 1, 1, 1, 18, 1, 20, 1)
 )
+custom_pvalues_cloud_median <- data.frame(
+  .y. = "cloud_median",
+  group1 = c("AH", "AH", "AH", "AH",
+             "PH", "PH", "PH",
+             "IW", "IW",
+             "DW"),
+  group2 = c("PH", "IW", "DW", "AW",
+             "IW", "DW", "AW",
+             "DW", "AW",
+             "AW"),
+  p = c(1.00, 1.00, 0.80, 0.32, 1.00, 0.10, 0.80, 0.36, 1.00, 0.02), 
+  p.adj = c(1.00, 1.00, 0.80, 0.32, 1.00, 0.10, 0.80, 0.36, 1.00, 0.02),
+  p.format = c(1.00, 1.00, 0.80, 0.32, 1.00, 0.10, 0.80, 0.36, 1.00, 0.02),
+  p.signif = c("ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "ns", "*"),
+  method = "Phylo-ANOVA",
+  y.position = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 95)
+)
 ```
 Plotting the violinplots/boxplots and displaying the ANOVA results in case there are significant differences between groups:
 ```{r}
@@ -641,8 +658,24 @@ environmental_dataset |>
   ggplot2::theme_minimal() +
   ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p9
 
-ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, ncol = 3, nrow = 3, 
-                  labels = c("a.", "b.", "c.", "d.", "e.", "f.", "g.", "h.", "i."))
+environmental_dataset |> 
+  dplyr::mutate(
+    growth_form = factor(growth_form, 
+                         levels = c("Annual Herbaceous", "Perennial Herbaceous", "Insular Woodiness", "Derived Woodiness", "Ancestral Woodiness"),
+                         labels = c("AH", "PH", "IW", "DW", "AW"))) |>
+  ggpubr::ggviolin(x = "growth_form", y = "cloud_median", 
+                   fill = "growth_form", 
+                   add = c("boxplot"), 
+                   add.params = list(fill = "white")) +  
+  ggpubr::stat_pvalue_manual(data = custom_pvalues_cloud_median, label = "p.signif", hide.ns = TRUE) +
+  ggplot2::scale_fill_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::scale_color_manual(values = c("#ABA300", "#ED68ED", "#00A9FF", "#00BE67", "#F8766D")) +
+  ggplot2::labs(x = "", y = "Cloud coverage (%)") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none", axis.title.y = ggplot2::element_text(size=7.5)) -> p10
+
+ggpubr::ggarrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol = 5, nrow = 2, 
+                  labels = c("a.", "b.", "c.", "d.", "e.", "f.", "g.", "h.", "i.", "j."))
 ```
 ## 4. Plot of TRI, highlighting IW:
 ```{r}
