@@ -1,6 +1,6 @@
 ## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center----
 # This file contains a collection of functions used to extract/clean plant trait data
-# Author: Lucas Jansen (l.s.jansen98@gmail.com)
+# Author: Lucas Jansen 
 # Date: 05/06/2025
 # Written using R version 4.4.1
 
