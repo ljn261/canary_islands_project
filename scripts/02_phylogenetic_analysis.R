@@ -1,6 +1,6 @@
 ## Title: Canary Islands Plant Trait Data Extraction Project - Naturalis Biodiversity Center----
-# This file contains the script that collects information from the Phylogenetic ANOVA
-# Author: Lucas Jansen (l.s.jansen98@gmail.com)
+# This file contains the script which performs phylogenetic analysis on the occurrence data
+# Author: Lucas Jansen
 # Date: 05/06/2025
 # Written using R version 4.4.1
 
