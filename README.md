@@ -5,5 +5,6 @@ Repository containing files for extraction, compilation and analysis of environm
 This repository consists of two folders:
 - `./data`: contains all (raw) data used in the project
 - `./scripts`: contains all scripts needed to compile the environmental datasets and perform statistical analyses
+- `./publication`: contains the supplementary tables associated with the research manuscript
 
 Please refer to the sub-folders and scripts for more details about the procedures implemented in this project.
